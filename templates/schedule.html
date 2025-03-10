@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+    {% block title %}Lịch chiếu - Galaxy Cinema{% endblock %}
+
+  <style>
+    .date-selector {
+      display: flex;
+      overflow-x: auto;
+      padding: 20px 10px;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      gap: 15px;
+      margin-top:100px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .date-selector button {
+      flex: 0 0 auto;
+      padding: 15px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: #f5f5f5;
+      color: #333;
+      transition: all 0.3s;
+    }
+
+    .date-selector button:hover {
+      background-color: #e0e0e0;
+    }
+
+    .date-selector button.active {
+      background-color: #ff3366;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(255, 51, 102, 0.3);
+    }
+
+    .movie-list {
+      padding: 30px 20px;
+    }
+
+    .movie-item {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 25px;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-start;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .movie-poster {
+      width: 120px;
+      height: 180px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+    }
+
+    .movie-info {
+      flex: 1;
+    }
+
+    .movie-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .movie-genre {
+      font-size: 16px;
+      color: #888;
+      margin-bottom: 15px;
+    }
+
+    .time-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .time-button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: #f0f8ff;
+      color: #333;
+      transition: all 0.3s;
+    }
+
+    .time-button:hover {
+      background-color: #1890ff;
+      color: white;
+      box-shadow: 0 4px 10px rgba(24, 144, 255, 0.3);
+    }
+    
+    /* Thêm CSS cho loading và thông báo */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #ff3366;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .message-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      max-width: 350px;
+      z-index: 9998;
+    }
+    
+    .alert {
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .alert-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <!-- Phần chọn ngày -->
+  <div class="date-selector" id="date-selector">
+    {% for date in dates %}
+      <button
+        data-date="{{ date|date:'Y-m-d' }}"
+        class="date-btn {% if date|date:'Y-m-d' == selected_date_str %}active{% endif %}"
+      >
+        {{ date|date:'d/m/Y' }} {% if forloop.first %}(Hôm nay){% endif %}
+      </button>
+    {% endfor %}
+  </div>
+
+  <!-- Danh sách phim -->
+  <div class="movie-list" id="movie-list">
+    {% for movie in movies %}
+      <div class="movie-item">
+        <div class="movie-poster" style="background-image: url('{{ movie.poster }}')"></div>
+        <div class="movie-info">
+          <div class="movie-title">{{ movie.title }}</div>
+          <div class="movie-genre">{{ movie.genre }}</div>
+          <div class="time-buttons">
+            {% for time in movie.times %}
+              <button class="time-button" onclick="selectScreening('{{ movie.id }}', '{{ time }}')">{{ time }}</button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Thêm container cho thông báo -->
+  <div id="message-container" class="message-container"></div>
+
+  <script>
+   document.addEventListener('DOMContentLoaded', function () {
+    const dateSelector = document.getElementById('date-selector');
+    const buttons = dateSelector.getElementsByTagName('button');
+
+    // Xác định ngày được chọn từ URL và cập nhật trạng thái nút bấm
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedDate = urlParams.get('date') || new Date().toISOString().split('T')[0]; // Ngày mặc định là hôm nay
+
+    console.log("URL selected date:", selectedDate);
+
+    for (let button of buttons) {
+        const buttonDate = button.getAttribute('data-date');
+        console.log("Button date:", buttonDate);
+        
+        // Thêm event listener cho mỗi nút
+        button.addEventListener('click', function() {
+            loadMovies(buttonDate);
+        });
+        
+        if (buttonDate === selectedDate) {
+            button.classList.add('active');  // Đánh dấu nút bấm được chọn
+        } else {
+            button.classList.remove('active'); // Đảm bảo các nút khác không được chọn
+        }
+    }
+    
+    // Thêm xử lý sự kiện cho nút đóng thông báo
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('close-alert')) {
+            e.target.parentElement.remove();
+        }
+    });
+});
+
+// Hàm hiển thị/ẩn trạng thái loading
+function showLoading() {
+    // Kiểm tra nếu đã có overlay thì không tạo thêm
+    if (document.querySelector('.loading-overlay')) return;
+    
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.innerHTML = '<div class="spinner"></div>';
+    document.body.appendChild(loadingOverlay);
+}
+
+function hideLoading() {
+    const overlay = document.querySelector('.loading-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+// Hàm hiển thị thông báo
+function showMessage(message, type = 'success') {
+    const messageContainer = document.getElementById('message-container');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.innerHTML = `
+        ${message}
+        <span class="close-alert" style="float: right; cursor: pointer; font-weight: bold;">&times;</span>
+    `;
+    
+    messageContainer.appendChild(alert);
+    
+    // Tự động xóa sau 5 giây
+    setTimeout(() => {
+        if (alert.parentElement) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Hàm để tải phim theo ngày được chọn
+function loadMovies(day) {
+    // Hiện loading trước khi chuyển trang
+    showLoading();
+    console.log("Đang tải lịch chiếu cho ngày:", day);
+    window.location.href = `/schedule/?date=${day}`;
+}
+
+// Hàm chọn suất chiếu và chuyển đến trang đặt vé
+function selectScreening(movieId, time) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedDate = urlParams.get('date') || new Date().toISOString().split('T')[0];
+    
+    // Hiển thị thông báo
+    showMessage(`Bạn đã chọn suất chiếu ${time} cho ngày ${selectedDate}`);
+    
+    // Chờ một chút để người dùng thấy thông báo, sau đó chuyển trang
+    setTimeout(() => {
+        window.location.href = `/booking?movie_id=${movieId}&screening_time=${time}&screening_date=${selectedDate}`;
+    }, 1000);
+}
+  </script>
+
+
+{% endblock %}

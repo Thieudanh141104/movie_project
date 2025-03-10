@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Tìm kiếm - Galaxy Cinema{% endblock %}
+
+{% block content %}
+<!--grids-sec1-->
+<section class="w3l-grids">
+    <div class="grids-main py-5" style="margin-top: 50px">
+        <div class="container py-lg-3">
+            <div class="headerhny-title">
+                <div class="w3l-title-grids">
+                    <div class="headerhny-left">
+                        <h3 class="hny-title searchTitle">Đang tải...</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="w3l-populohny-grids">
+                <!-- Movies will be loaded here  -->
+            </div>
+        </div>
+    </div>
+</section>
+<!--//grids-sec1-->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const query = urlParams.get('genre_name') || urlParams.get('search');
+document.querySelector('.searchTitle').textContent = "Kết quả tìm kiếm cho '" + query + "'";
+
+function searchResult() {
+    $.ajax({
+        url: `/api/movies?search=${query}`,
+        method: 'GET',
+        success: function (movies) {
+            if (movies.length > 0) {
+                $.each(movies.slice(0, 8), function (index, movie) {
+                    let movieHTML = `
+                    <div class="item vhny-grid">
+                        <div class="box16">
+                            <a href="?movie_id=${movie.id}">
+                                <figure>
+                                    <img class="img-fluid" src='${movie.image_ava}' alt="">
+                                </figure>
+                                <div class="box-content">
+                                    <h3 class="title" style="padding: 0">${movie.title}</h3>
+                                    <h4>
+                                        <span class="post"><span class="fa fa-clock-o"></span> ${movie.duration}</span>
+                                        <span class="post fa fa-heart text-right"></span>
+                                    </h4>
+                                </div>
+                            </a>
+                        </div>
+                    </div>`;
+                    $('.w3l-populohny-grids').append(movieHTML);
+                });
+                $('.w3l-populohny-grids').trigger('refresh.owl.carousel');
+            }
+        },
+        error: function (error) {
+            console.error('Error', error);
+        }
+    });
+}
+
+$(document).ready(function () {
+    searchResult();
+});
+
+</script>
+{% endblock %}
+
