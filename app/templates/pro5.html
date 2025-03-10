@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}Tài khoản - Galaxy Cinema{% endblock %}
+{% block content %}
+
+{% load static %}
+
+<style>
+    .profile-container {
+        background-color: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        width: 450px;
+        margin: 100px auto; /* Center the container */
+        text-align: center;
+    }
+    .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 20px auto;
+        border: 3px solid #ddd;
+    }
+    .form-group {
+        margin-bottom: 10px;
+        text-align: left;
+    }
+    .form-label {
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .form-group input {
+        width: 95%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .form-group input[readonly] {
+        background-color: #f0f0f0;
+    }
+    .update-btn {
+        background-color: #ff7d0a;
+        color: white;
+        padding: 15px 30px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+    .update-btn:hover {
+        background-color: #ff5a00;
+    }
+    .change-link {
+        color: #ff7d0a;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 14px;
+        margin-left: 8px;
+    }
+    .change-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="profile-container">
+    <form id="updateForm" method="POST">
+        <div class="previewAvatar ava" style="width: 85px; height:85px;position: relative;left:40%; background-size: cover; background-position: center; border-radius: 50%">
+            <label for="avatarPicker" style="cursor: pointer;right:0;bottom:0;position:absolute;z-index:2;color:black">
+                <i class="fa-solid fa-camera"></i>
+            </label>
+            <input type="file" id="avatarPicker" accept="image/*" name="anhdaidien" style="display:none;" />
+        </div>
+        {% csrf_token %}
+        <div class="form-group">
+            <div class="form-label">Tên người dùng</div>
+            <input id="username">
+        </div>
+        <div class="form-group">
+            <div class="form-label">Email</div>
+            <input id="email">
+        </div>
+        <button type="button" class="update-btn" onclick="updateMyInfo()">Cập nhật</button>
+    </form>
+</div>
+
+<script>
+    let currentUserId = "{{ request.session.current_user_id }}";
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchMyInfo();
+    });
+
+    function fetchMyInfo() {
+        $.ajax({
+            url: `/api/users/${currentUserId}`,
+            method: 'GET',
+            success: function(user) {
+                document.getElementById('username').value = user.username;
+                document.getElementById('email').value = user.email;
+                document.querySelector('.ava').style.backgroundImage = `url('${user.avatar}')`;
+                document.querySelector('.previewAvatar').style.backgroundImage = `url('${user.avatar}')`;
+            },
+            error: function(error) {
+                console.error('Error fetching user:', error);
+            }
+        });
+    }
+
+    function updateMyInfo() {
+    const input = document.getElementById('avatarPicker');
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const formData = new FormData();
+
+    // Thêm vào formData
+    formData.append('email', email);
+    formData.append('username', username);
+
+    // Kiểm tra nếu có file ảnh thì thêm vào formData
+    if (input && input.files && input.files.length > 0) {
+        formData.append('avatar', input.files[0]);
+    }
+
+    $.ajax({
+        url: `/api/users/update-user/`,
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        data: formData,
+        processData: false,  // Không cần jQuery xử lý dữ liệu
+        contentType: false,  // Để FormData tự động set content type
+        success: function(response) {
+            alert('Thông tin đã được cập nhật thành công');
+        },
+        error: function(error) {
+            console.error('Error updating user:', error);
+            alert('Có lỗi xảy ra khi cập nhật thông tin');
+        }
+    });
+}
+
+document.addEventListener('change', function (event) {
+    if (event.target && event.target.id === 'avatarPicker') {
+        const preview = document.querySelector('.previewAvatar');
+        const file = event.target.files[0]; // Lấy file được chọn
+
+        if (file) {
+            const objectURL = URL.createObjectURL(file); // Tạo URL tạm thời cho file
+            preview.style.backgroundImage = `url("${objectURL}")`;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none'; // Ẩn ảnh nếu không có file
+        }
+    }
+});
+    // Hàm lấy giá trị CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+{% endblock %}

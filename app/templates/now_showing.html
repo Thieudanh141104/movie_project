@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Phim Đang Chiếu - Galaxy Cinema{% endblock %}
+
+{% block content %}
+<!--grids-sec1-->
+<section class="w3l-grids">
+    <div class="grids-main py-5" style="margin-top: 50px">
+        <div class="container py-lg-3">
+            <div class="headerhny-title">
+                <div class="w3l-title-grids">
+                    <div class="headerhny-left">
+                        <h3 class="hny-title">Phim đang chiếu</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="w3l-populohny-grids">
+                <!-- Movies will be loaded here via AJAX -->
+            </div>
+        </div>
+    </div>
+</section>
+<!--//grids-sec1-->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function loadMovie_nowShowing() {
+        $.ajax({
+            url: '/api/movies?status=now_showing',
+            method: 'GET',
+            success: function(movies) {
+                if (movies.length > 0) {
+                    $.each(movies.slice(0, 8), function(index, movie) {
+                        let movieHTML = `
+                        <div class="item vhny-grid">
+                            <div class="box16">
+                                <a href="/details?movie_id=${movie.id}">
+                                    <figure>
+                                        <img class="img-fluid" src='${movie.image_ava}' alt="">
+                                    </figure>
+                                    <div class="box-content">
+                                        <h3 class="title">${movie.title}</h3>
+                                        <h4>
+                                            <span class="post"><span class="fa fa-clock-o"></span> ${movie.duration}</span>
+                                            <span class="post fa fa-heart text-right"></span>
+                                        </h4>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>`;
+                        $('.w3l-populohny-grids').append(movieHTML);
+                    });
+                    $('.w3l-populohny-grids').trigger('refresh.owl.carousel');
+                }
+            },
+            error: function(error) {
+                console.error('Error', error);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        loadMovie_nowShowing();
+    });
+</script>
+{% endblock %}
+
