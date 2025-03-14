@@ -450,7 +450,17 @@
   
   .momo-button {
     background-color: #ae2070;
-    background-image: linear-gradient(to right, #ae2070, #d81b60);
+    color: white;
+    font-weight: bold;
+    border: none;
+    transition: all 0.3s ease;
+  }
+  
+  .momo-button:hover {
+    background-color: #8e1a5c;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   }
   
   .paypal-button {
@@ -665,6 +675,21 @@
     min-height: 300px; /* Đảm bảo có đủ không gian */
     position: relative;
   }
+  
+  .card-button {
+    background-color: #1A1F71;
+    color: white;
+    font-weight: bold;
+    border: none;
+    transition: all 0.3s ease;
+  }
+  
+  .card-button:hover {
+    background-color: #151a5c;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
 </style>
 
   <div class="container" id="progress-container-id">
@@ -778,6 +803,7 @@
                                 <input type="text" id="card-cvv" placeholder="123" required>
                               </div>
                             </div>
+                            <button id="card-payment-button" class="btn btn-block mt-3 card-button">Thanh toán bằng thẻ</button>
                           </div>
                         </div>
                       </div>
@@ -817,6 +843,7 @@
                             <i class="fa fa-lock payment-method-info-icon"></i>
                             <p class="payment-method-info-text">Thanh toán an toàn và nhanh chóng qua ví điện tử Momo.</p>
                           </div>
+                          <button id="momo-payment-button" class="btn btn-block mt-3 momo-button">Thanh toán qua Momo</button>
                         </div>
                       </div>
                     </div>
@@ -862,128 +889,6 @@
                   </div>
                 </div>
               </div>
-            </fieldset>
-            <fieldset>
-              <h2>E-Ticket</h2>
-              <div class="ticket-body">
-                <div class="ticket">
-                  <div class="holes-top"></div>
-                  <div class="title">
-                    <p class="cinema">Galaxy Cinema</p>
-                    <p class="movie-name">Movie Name</p>
-                  </div>
-                  <div class="poster"></div>
-                  <div class="info">
-                    <table class="info-table ticket-table">
-                      <tr>
-                        <th>Phòng chiếu</th>
-                        <th>Ghế</th>
-                      </tr>
-                      <tr>
-                        <td class="bigger room">18</td>
-                        <td class="bigger seat_number">24</td>
-                      </tr>
-                    </table>
-                    <table class="info-table ticket-table">
-                      <tr>
-                        <th>Ngày chiếu</th>
-                        <th>Thời gian</th>
-                      </tr>
-                      <tr>
-                        <td class="screening_date">4/13/21</td>
-                        <td class="screening_time">19:30</td>
-                      </tr>
-                    </table>
-                  </div>
-                  <div class="holes-lower"></div>
-                  <div class="serial">
-                    <table class="barcode ticket-table">
-                      <tr>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                      </tr>
-                    </table>
-                    <table class="numbers ticket-table">
-                      <tr>
-                        <td>9</td>
-                        <td>1</td>
-                        <td>7</td>
-                        <td>3</td>
-                        <td>7</td>
-                        <td>5</td>
-                        <td>4</td>
-                        <td>4</td>
-                        <td>4</td>
-                        <td>5</td>
-                        <td>4</td>
-                        <td>1</td>
-                        <td>4</td>
-                        <td>7</td>
-                        <td>8</td>
-                        <td>7</td>
-                        <td>3</td>
-                        <td>4</td>
-                        <td>1</td>
-                        <td>4</td>
-                        <td>5</td>
-                        <td>2</td>
-                      </tr>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              <input type="button" name="previous-step" class="home-page-btn" value="Đi đến giỏ hàng"
-                onclick="window.location.origin" />
-                <input type="hidden" name="previous-step" class="pay-fail-btn previous-step" value="Quay lại"/>
             </fieldset>
           </form>
         </div>
@@ -1384,6 +1289,12 @@
                             console.error('Không tìm thấy giá cho ghế:', seatId);
                         }
     
+                        // Nếu giá ghế vẫn là 0, đặt giá mặc định
+                        if (seatPrice === 0) {
+                            seatPrice = 50; // Giá mặc định 50.000đ
+                            console.log(`Đặt giá mặc định ${seatPrice}.000đ cho ghế ${seatId}`);
+                        }
+    
                         if (this.status() == 'available') {
                             // Add to cart
                             $('<li style="width: 80%">' + seatId + ' - ' + seatPrice + '.000đ</li>')
@@ -1534,71 +1445,7 @@
         // Cập nhật tổng tiền
         $('#order-total').text(total || 0);
     }
-    
-    // // Kiểm tra xem có trạng thái đặt vé đã lưu không
-    // function checkSavedBookingState() {
-    //     try {
-    //         const savedState = localStorage.getItem('bookingState');
-    //         if (savedState) {
-    //             return JSON.parse(savedState);
-    //         }
-    //     } catch (e) {
-    //         console.error('Lỗi khi đọc trạng thái đặt vé:', e);
-    //     }
-    //     return null;
-    // }
-    
-    // // Lưu trạng thái đặt vé hiện tại
-    // function saveCurrentBookingState() {
-    //     try {
-    //         const currentState = {
-    //             movieId: getParameterByName('movie_id'),
-    //             screeningId: window.screeningId,
-    //             roomId: window.roomId,
-    //             selectedDate: window.selectedDate,
-    //             timestamp: new Date().getTime()
-    //         };
-            
-    //         localStorage.setItem('bookingState', JSON.stringify(currentState));
-    //     } catch (e) {
-    //         console.error('Lỗi khi lưu trạng thái đặt vé:', e);
-    //     }
-    // }
-    
-    // // Khôi phục trạng thái đặt vé
-    // function restoreBookingState(state) {
-    //     try {
-    //         // Chỉ khôi phục nếu trạng thái được lưu trong vòng 30 phút
-    //         const currentTime = new Date().getTime();
-    //         const thirtyMinutes = 30 * 60 * 1000;
-            
-    //         if (currentTime - state.timestamp > thirtyMinutes) {
-    //             console.log('Trạng thái đặt vé đã quá hạn, khởi tạo mới');
-    //             localStorage.removeItem('bookingState');
-    //             load_date();
-    //             return;
-    //         }
-            
-    //         // Khôi phục trạng thái
-    //         load_date();
-    //         window.selectedDate = state.selectedDate;
-    //         if (state.selectedDate) {
-    //             load_screeningTime(state.selectedDate);
-    //         }
-    //         
-    //         // Khôi phục screeningId và roomId nếu có
-    //         if (state.screeningId && state.roomId) {
-    //             window.screeningId = state.screeningId;
-    //             window.roomId = state.roomId;
-    //             // Không gọi loadSeats ngay lập tức, để người dùng chọn lại
-    //         }
-    //     } catch (e) {
-    //         console.error('Lỗi khi khôi phục trạng thái đặt vé:', e);
-    //         // Nếu có lỗi, khởi tạo lại từ đầu
-    //         load_date();
-    //     }
-    // }
-  
+     
     // Thiết lập sự kiện click bên ngoài các nút .screen-time
     document.addEventListener("click", function(event) {
         if (!event.target.classList.contains("screen-time")) {
@@ -1752,6 +1599,71 @@
         }
     }
 
+    function updatePriceDisplay(selectedSeatsWithPrices, totalPrice) {
+        // Cập nhật thông tin giá vé trong UI
+        const seatPriceContainer = $('#seats-pricing');
+        seatPriceContainer.empty();
+        
+        selectedSeatsWithPrices.forEach(function(seat) {
+            const priceFormatted = formatCurrency(seat.price * 1000);
+            seatPriceContainer.append(`
+                <div class="seat-price-item">
+                    <div class="seat-number">${seat.seatNumber}</div>
+                    <div class="seat-price">${priceFormatted}</div>
+                </div>
+            `);
+        });
+        
+        // Cập nhật tổng tiền
+        const totalPriceFormatted = formatCurrency(totalPrice * 1000);
+        $('#total-payment-amount').text(totalPriceFormatted);
+        $('#momo-payment-amount').val(totalPrice * 1000);
+        
+        console.log("Đã cập nhật hiển thị giá vé:", {
+            seats: selectedSeatsWithPrices, 
+            totalPrice: totalPrice,
+            totalPriceFormatted: totalPriceFormatted
+        });
+    }
+
+    function goToPaymentStep(selectedSeats, totalPrice) {
+        // Ẩn bước chọn ghế và hiển thị bước thanh toán
+        $('#seat-selection-step').hide();
+        $('#payment-step').show();
+        
+        // Cập nhật thông tin thanh toán
+        $('#payment-selected-seats').text(selectedSeats.join(', '));
+        $('#payment-total-price').text(formatCurrency(totalPrice * 1000));
+        
+        // Lưu dữ liệu để sử dụng khi thanh toán
+        window.selectedSeatsForPayment = selectedSeats;
+        window.totalPriceForPayment = totalPrice;
+        
+        // Hiển thị thông báo
+        showMessage('Đã khóa ghế thành công. Vui lòng chọn phương thức thanh toán.', 'success');
+        
+        // Cuộn đến phần thanh toán
+        $('html, body').animate({
+            scrollTop: $('#payment-step').offset().top - 100
+        }, 500);
+        
+        // Ẩn loading
+        hideLoading();
+        
+        console.log("Đã chuyển đến bước thanh toán với:", {
+            selectedSeats: selectedSeats, 
+            totalPrice: totalPrice
+        });
+    }
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', { 
+            style: 'currency', 
+            currency: 'VND',
+            maximumFractionDigits: 0
+        }).format(amount);
+    }
+    
     // Hàm hiển thị thông báo
     function showMessage(message, type = 'success') {
         const messageContainer = document.getElementById('message-container');
@@ -1880,6 +1792,11 @@
             return;
         }
         
+        // Đảm bảo totalPrice là một số hợp lệ và lớn hơn 0
+        if (totalPrice <= 0) {
+            totalPrice = selectedSeats.length * 50; // Giá mặc định 50.000 VNĐ mỗi ghế
+        }
+        
         console.log("Thanh toán Momo với: ", { screeningId, roomId, selectedSeats, totalPrice });
         
         // Lưu thông tin ghế đã chọn vào localStorage để sử dụng sau khi quay lại từ Momo
@@ -1979,7 +1896,7 @@
         
         // Kiểm tra và cập nhật trạng thái ghế
         $.ajax({
-            url: `/api/seats/check_and_lock/`,
+            url: '/api/seats/check_and_lock/',
             method: 'POST',
             contentType: 'application/json',
             headers: {
@@ -1987,8 +1904,17 @@
             },
             data: JSON.stringify({
                 room_id: roomId,
+                screening_id: window.screeningId,
                 seats: selectedSeats
             }),
+            beforeSend: function(xhr) {
+                console.log("Gọi API check_and_lock với URL:", `/api/seats/check_and_lock/`);
+                console.log("Data:", JSON.stringify({
+                    room_id: roomId,
+                    screening_id: window.screeningId,
+                    seats: selectedSeats
+                }));
+            },
             success: function (lockedSeats) {
                 // Nếu API trả về lỗi nhưng không phải dạng HTTP error
                 if (lockedSeats.error) {
@@ -1997,111 +1923,50 @@
                     return;
                 }
                 
-                let seatIdsToUpdate = [];
-                
-                // Kiểm tra dữ liệu trả về
-                if (Array.isArray(lockedSeats)) {
-                    seatIdsToUpdate = lockedSeats.map(seat => seat.id);
-                } else {
-                    // Nếu dữ liệu không phải là mảng, thử kiểm tra cấu trúc khác
-                    if (lockedSeats.seats && Array.isArray(lockedSeats.seats)) {
-                        seatIdsToUpdate = lockedSeats.seats.map(seat => seat.id);
-                    } else {
-                        // Nếu không lấy được dữ liệu, hiển thị lỗi
-                        hideLoading();
-                        showMessage('Không thể lấy thông tin ghế. Vui lòng thử lại.', 'danger');
-                        console.error('Dữ liệu ghế không đúng định dạng:', lockedSeats);
-                        return;
-                    }
-                }
-                
-                // Nếu không có ghế nào để cập nhật
-                if (seatIdsToUpdate.length === 0) {
+                // Xử lý cấu trúc phản hồi mới
+                if (lockedSeats.success === false) {
                     hideLoading();
-                    showMessage('Không tìm thấy ghế nào để đặt. Vui lòng thử lại.', 'danger');
+                    showMessage('Lỗi: ' + lockedSeats.message, 'danger');
                     return;
                 }
-
-                // Cập nhật trạng thái ghế
-                let updatePromises = seatIdsToUpdate.map(seatId => {
-                    return $.ajax({
-                        url: `/api/seats/${seatId}/`,
-                        method: 'PATCH',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'),
-                        },
-                        contentType: 'application/json',
-                        data: JSON.stringify({ status: 'unavailable' })
+                
+                // Debug thông tin
+                console.log("API check_and_lock trả về:", lockedSeats);
+                
+                // Xử lý cấu trúc phản hồi mới (success, seat_prices, total_price, ...)
+                let selectedSeatsWithPrices = [];
+                let totalPrice = 0;
+                
+                if (lockedSeats.success === true) {
+                    // Lấy thông tin giá vé và tổng tiền
+                    const seatPrices = lockedSeats.seat_prices || {};
+                    totalPrice = lockedSeats.total_price || 0;
+                    
+                    // Lưu thông tin khóa
+                    const lockId = lockedSeats.lock_id;
+                    localStorage.setItem('seat_lock_id', lockId);
+                    
+                    // Cập nhật giá vé cho mỗi ghế
+                    selectedSeats.forEach(function(seatNumber) {
+                        const seatPrice = seatPrices[seatNumber] || 0;
+                        selectedSeatsWithPrices.push({
+                            seatNumber: seatNumber,
+                            price: seatPrice
+                        });
                     });
-                });
-
-                // Xử lý khi tất cả các yêu cầu cập nhật thành công
-                Promise.all(updatePromises).then(() => {
-                    // Sau khi cập nhật ghế, tạo booking
-                    $.ajax({
-                        url: `/api/bookings/`,
-                        method: 'POST',
-                        contentType: 'application/json',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'),
-                        },
-                        data: JSON.stringify({
-                            screening: screeningId,
-                            total_price: totalPrice,
-                            user: currentUserId,
-                            payment_method: 'momo'  // Thêm thông tin phương thức thanh toán
-                        }),
-                        success: function (bookingResponse) {
-                            let bookingId = bookingResponse.id;
-
-                            // Thêm ghế vào booking
-                            let userSeatPromises = seatIdsToUpdate.map(seatId => {
-                                return $.ajax({
-                                    url: `/api/userseats/`,
-                                    method: 'POST',
-                                    contentType: 'application/json',
-                                    headers: {
-                                        'X-CSRFToken': getCookie('csrftoken'),
-                                    },
-                                    data: JSON.stringify({
-                                        booking: bookingId,
-                                        seat: seatId
-                                    })
-                                });
-                            });
-
-                            Promise.all(userSeatPromises).then(() => {
-                                hideLoading();
-                                // Xóa dữ liệu đã lưu
-                                localStorage.removeItem('momoSelectedSeats');
-                                localStorage.removeItem('momoTotalPrice');
-                                localStorage.removeItem('momoScreeningId');
-                                localStorage.removeItem('momoRoomId');
-                                localStorage.removeItem('bookingState'); // Xóa trạng thái đặt vé
-                                
-                                showMessage('Đặt vé thành công! Đang chuyển hướng đến trang vé...', 'success');
-                                
-                                // Chuyển hướng đến trang e-ticket với booking_id sau 1 giây
-                                setTimeout(function() {
-                                    window.location.href = `/e-ticket?booking_id=${bookingId}`;
-                                }, 1000);
-                            }).catch(error => {
-                                hideLoading();
-                                console.error('Lỗi khi thêm ghế vào booking:', error);
-                                showMessage('Lỗi trong quá trình xử lý thanh toán. Vui lòng thử lại.', 'danger');
-                            });
-                        },
-                        error: function (error) {
-                            hideLoading();
-                            console.error('Lỗi khi tạo booking:', error);
-                            showMessage('Không thể hoàn tất thanh toán. Vui lòng thử lại.', 'danger');
-                        }
-                    });
-                }).catch(error => {
+                    
+                    // Hiển thị thông tin giá vé và tổng tiền
+                    updatePriceDisplay(selectedSeatsWithPrices, totalPrice);
+                    
+                    // Chuyển đến bước thanh toán
+                    goToPaymentStep(selectedSeats, totalPrice);
+                } else {
+                    // Nếu không lấy được dữ liệu, hiển thị lỗi
                     hideLoading();
-                    console.error('Lỗi khi cập nhật trạng thái ghế:', error);
-                    showMessage('Một số ghế không thể đặt. Vui lòng thử lại.', 'danger');
-                });
+                    showMessage('Không thể lấy thông tin ghế. Vui lòng thử lại.', 'danger');
+                    console.error('Dữ liệu ghế không đúng định dạng:', lockedSeats);
+                    return;
+                }
             },
             error: function (error) {
                 hideLoading();
@@ -2321,8 +2186,38 @@
         return false;
     };
     
-
-
-
+    // Xử lý sự kiện thanh toán
+    $(document).ready(function() {
+        // Xử lý nút thanh toán qua Momo
+        $('#momo-payment-button').on('click', function(e) {
+            e.preventDefault();
+            // Sử dụng dữ liệu đã lưu từ bước check_and_lock
+            const selectedSeats = window.selectedSeatsForPayment || [];
+            const totalPrice = window.totalPriceForPayment || 0;
+            
+            if (selectedSeats.length > 0 && totalPrice > 0) {
+                processMomoPayment(selectedSeats, totalPrice);
+            } else {
+                showMessage("Không tìm thấy thông tin về ghế đã chọn. Vui lòng thử lại.", "warning");
+            }
+        });
+        
+        // Xử lý nút thanh toán qua thẻ tín dụng
+        $('#card-payment-button').on('click', function(e) {
+            e.preventDefault();
+            showMessage("Chức năng thanh toán qua thẻ tín dụng đang được phát triển.", "info");
+        });
+        
+        // Kiểm tra xem người dùng vừa từ trang thanh toán quay lại không
+        const paymentResult = getParameterByName('payment_result');
+        if (paymentResult === 'success') {
+            showMessage("Thanh toán thành công! Bạn sẽ được chuyển đến trang vé của mình.", "success");
+            setTimeout(function() {
+                window.location.href = '/history/';
+            }, 2000);
+        } else if (paymentResult === 'failed') {
+            showMessage("Thanh toán không thành công. Vui lòng thử lại hoặc chọn phương thức thanh toán khác.", "danger");
+        }
+    });
 </script>
 {% endblock %}

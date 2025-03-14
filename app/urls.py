@@ -39,6 +39,9 @@ urlpatterns = [
     path('api/momo/ipn/', views.momo_ipn, name='momo_ipn'),
     path('payment-success/', views.index, name='payment_success'),  # Tạm thời chuyển hướng về trang chủ
     path('payment-failed/', views.index, name='payment_failed'),    # Tạm thời chuyển hướng về trang chủ
+    
+    # API endpoint kiểm tra và khóa ghế
+    path('api/seats/check_and_lock/', views.check_and_lock_seats, name='check_and_lock'),
 ]
 
 

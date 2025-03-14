@@ -369,33 +369,6 @@
         background-color: #ff4757;
     }
     
-    /* Nút xem chi tiết */
-    .view-details {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #e4d804;
-        color: #0d253f;
-        padding: 8px 15px;
-        border-radius: 20px;
-        font-weight: 600;
-        text-decoration: none;
-        opacity: 0;
-        transition: all 0.3s ease;
-    }
-    
-    .movie-item:hover .view-details {
-        opacity: 1;
-        bottom: 30px;
-    }
-    
-    .view-details:hover {
-        background-color: #fff;
-        color: #0d253f;
-        text-decoration: none;
-    }
-    
     /* Đảm bảo hàng phim cân đối */
     .movies-row {
         display: flex;
@@ -995,11 +968,6 @@
                     item.querySelector('.movie-poster').insertAdjacentHTML('beforeend', 
                         '<div class="movie-status coming-soon">Sắp chiếu</div>');
                 }
-                
-                // Thêm nút "Xem chi tiết"
-                const movieId = item.getAttribute('data-id');
-                item.querySelector('.movie-poster').insertAdjacentHTML('beforeend', 
-                    `<a href="/details?id=${movieId}" class="view-details">Xem chi tiết</a>`);
                 
                 // Kiểm tra xem có nút "Mua vé" không và áp dụng class mới
                 const buyButton = item.querySelector('a[href*="booking"], a:contains("Mua vé")');
