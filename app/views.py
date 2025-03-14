@@ -213,52 +213,34 @@ def history(request):
     return render(request, 'history.html', context)
 
 def e_ticket(request):
-    # Lấy booking_id từ query parameter
     booking_id = request.GET.get('booking_id')
     if not booking_id:
         return JsonResponse({'error': 'Missing booking_id in query parameters'}, status=400)
 
     booking = get_object_or_404(Booking, id=booking_id)
-    screening = get_object_or_404(Screening, id=booking.screening.id)
-    movie = get_object_or_404(Movie, id=screening.movie.id)
-    room = get_object_or_404(Room, id=screening.room.id)
+    screening = booking.screening
+    movie = screening.movie
+    room = screening.room
 
     user_seats = UserSeat.objects.filter(booking=booking)
     seats = []
+    total_price = 0
+
     for user_seat in user_seats:
-        seat = get_object_or_404(Seat, id=user_seat.seat.id)
+        seat = user_seat.seat
         seats.append({
             'seat_number': seat.seat_number,
             'ticket_price': seat.ticket_price,
         })
+        total_price += seat.ticket_price
 
-    # Tạo context để gửi dữ liệu đến template
     context = {
-        'booking': {
-            'id': booking.id,
-            'booking_time': booking.booking_time,
-            'total_price': booking.total_price,
-            'user': booking.user.id,  # Hoặc thông tin user chi tiết nếu cần
-            'screening': booking.screening.id,
-        },
-        'screening': {
-            'id': screening.id,
-            'screening_date': screening.screening_date,
-            'screening_time': screening.screening_time,
-            'movie': screening.movie.id,
-            'room': screening.room.id,
-        },
-        'movie': {
-            'id': movie.id,
-            'title': movie.title,
-            'genre': movie.genre,
-            'image_ava': movie.image_ava,
-        },
-        'room': {
-            'id': room.id,
-            'name': room.name,
-        },
+        'booking': booking,
+        'screening': screening,
+        'movie': movie,
+        'room': room,
         'seats': seats,
+        'total_price': total_price,
     }
 
     # Render template với context

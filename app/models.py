@@ -1,5 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+import uuid
+from django.urls import reverse
+import qrcode
+from io import BytesIO
+import base64
 
 class User(models.Model):
     username = models.CharField(max_length=100)
@@ -75,6 +80,17 @@ class Booking(models.Model):
     booking_time = models.DateTimeField(auto_now_add=True)
     total_price = models.DecimalField(max_digits=6, decimal_places=2)
     payment_method = models.CharField(max_length=50, default='card')
+    qr_code_uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+
+    def generate_qr_code(self):
+        """Tạo QR code động mà không cần lưu vào file"""
+        qr = qrcode.make(str(self.qr_code_uuid))  # Tạo mã QR từ UUID
+
+        buffer = BytesIO()
+        qr.save(buffer, format="PNG")
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+        return f"data:image/png;base64,{qr_base64}"
 
     def __str__(self):
         return f"Booking by {self.user.username} in {self.screening.room.name} with {self.total_price}"

@@ -1,262 +1,213 @@
 {% extends 'base.html' %}
 {% block title %}E-ticket - Galaxy Cinema{% endblock %}
 {% block content %}
-    <style>
-    .title-h3{
-        text-align: center;
-        margin-bottom: 35px;
-    }
-    .movie-list {
-      padding: 30px 20px;
-    }
+    <div class="ticket-container">
+        <div class="ticket">
+            <div class="poster">
+                <img src="{{ movie.image_ava }}" alt="{{ movie.title }}">
+            </div>
+            <div class="movie-title">{{ movie.title }}</div>
+            <div class="separator"></div>
+            <div class="cinema-info">
+                <div class="cinema-name">{{ room.name }}</div>
+                <div class="showtime">Suất: {{ screening.screening_time }} - {{ screening.screening_date }}</div>
+            </div>
+           <div class="qr-code">
+               {% if booking.generate_qr_code %}
+                    <img src="{{ booking.generate_qr_code }}" alt="QR Code">
+               {% endif %}
+           </div>
 
-    .movie-item {
-      background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      margin: 25px 170px;
-      overflow: hidden;
-      display: flex;
-      align-items: flex-start;
-      padding: 25px;
-      gap: 20px;
-    }
-
-    .movie-poster {
-      width: 180px;
-      height: 240px;
-      background-size: cover;
-      background-position: center;
-      border-radius: 10px;
-    }
-
-    .movie-info {
-      flex: 1;
-    }
-
-    .movie-title, .booking-total-price {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #333;
-    }
-    .booking-total-price {
-        text-align: right;
-    }
-    .movie-genre {
-      font-size: 16px;
-      color: #888;
-      margin-bottom: 15px;
-    }
-    .screening-time, .screening-date, .booking-time {
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 15px;
-    }
-
-  </style>
-    <div style="padding: 100px;text-align: center">
-        <div class="movie-item" style="text-align: left" onclick="window.location='/e-ticket?booking_id=${booking.id}'">
-            <div class="movie-info">
-                <div class="movie-title">Mã vé: {{ booking.id }}</div>
-                <div class="movie-title">{{ movie.title }}</div>
-                <div class="screening-time">Suất: {{ screening.screening_time }}</div>
-                <div class="screening-date">Ngày: {{ screening.screening_date }}</div>
-                {% for seat in seats %}
-                <div class="booking-time">Ghế: {{ seat.seat_number }} || Giá vé: {{ seat.ticket_price }}</div>
-                {% endfor %}
-                <div class="booking-time">Thời gian đặt vé: {{ booking.booking_time }}</div>
-                <div class="booking-total-price">Đã thanh toán: {{ booking.total_price }}0đ</div>
+            <div class="separator"></div>
+            <div class="ticket-details">
+                <div class="ticket-code">
+                    <div class="label">Mã vé</div>
+                    <div class="value">{{ booking.id }}</div>
+                </div>
+                <div class="seat">
+                    <div class="label">Ghế</div>
+                    <div class="value">
+                        {% for seat in seats %}
+                            {{ seat.seat_number }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="price">
+                    <div class="label">Giá</div>
+                    <div class="value"> {{ total_price }}đ</div>
+                </div>
             </div>
         </div>
-        <h2>E-Ticket</h2>
-        <div class="ticket-body">
-        <div class="ticket">
-          <div class="holes-top"></div>
-          <div class="title">
-            <p class="cinema" style="margin-bottom: 10px;">Galaxy Cinema</p>
-            <p class="movie-title">{{ movie.title }}</p>
-          </div>
-          <div class="poster" style="height: 300px;background-size: cover;
-          background-position: center;background-image: url('{{ movie.image_ava }}')"></div>
-          <div class="info">
-            <table class="info-table ticket-table">
-              <tr>
-                <th>Phòng chiếu</th>
-                <th>Ghế</th>
-              </tr>
-              <tr>
-                <td class="bigger room">{{ room.name }}</td>
-                <td class="bigger seat_number">
-                    {% for seat in seats %}
-                        {{ seat.seat_number }},
-                    {% endfor %}
-                </td>
-              </tr>
-            </table>
-            <table class="info-table ticket-table">
-              <tr>
-                <th>Ngày chiếu</th>
-                <th>Thời gian</th>
-              </tr>
-              <tr>
-                <td class="screening_date">{{ screening.screening_date }}</td>
-                <td class="screening_time">{{ screening.screening_time }}</td>
-              </tr>
-            </table>
-          </div>
-          <div class="holes-lower"></div>
-          <div class="serial">
-            <table class="barcode ticket-table">
-              <tr>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-                <td style="background-color:black;"></td>
-                <td style="background-color:white;"></td>
-              </tr>
-            </table>
-            <table class="numbers ticket-table">
-              <tr>
-                <td>9</td>
-                <td>1</td>
-                <td>7</td>
-                <td>3</td>
-                <td>7</td>
-                <td>5</td>
-                <td>4</td>
-                <td>4</td>
-                <td>4</td>
-                <td>5</td>
-                <td>4</td>
-                <td>1</td>
-                <td>4</td>
-                <td>7</td>
-                <td>8</td>
-                <td>7</td>
-                <td>3</td>
-                <td>4</td>
-                <td>1</td>
-                <td>4</td>
-                <td>5</td>
-                <td>2</td>
-              </tr>
-            </table>
-          </div>
+        <div class="button-container">
+            <input type="button" name="previous-step" class="home-page-btn" value="Quay lại"
+            onclick="window.history.back()" />
         </div>
-        </div>
-        <input type="button" name="previous-step" class="home-page-btn" value="Quay lại"
-        onclick="window.history.back()" />
     </div>
+    <style>
+        :root {
+            --theme-bg: #f5f5f5;
+            --theme-orange: #FF6B01;
+            --theme-text: #333;
+            --theme-light-text: #666;
+            --separator-color: #ddd;
+        }
+
+        .ticket-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 90px 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .ticket {
+            width: 420px;
+            height: auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .poster {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .poster img {
+            width: 170px;
+            height: 240px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .movie-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--theme-text);
+        }
+
+        .movie-format {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .format {
+            font-size: 14px;
+            color: var(--theme-light-text);
+        }
+
+        .rating {
+            background-color: var(--theme-orange);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .separator {
+            border-top: 1px dashed var(--separator-color);
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .separator::before, .separator::after {
+            content: "";
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: var(--theme-bg);
+            border-radius: 50%;
+            top: -6px;
+        }
+
+        .separator::before {
+            left: -20px;
+        }
+
+        .separator::after {
+            right: -20px;
+        }
+
+        .cinema-info {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .cinema-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: var(--theme-text);
+        }
+
+        .showtime {
+            font-size: 14px;
+            color: var(--theme-light-text);
+        }
+
+        .qr-code {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .qr-code img {
+            width: 120px;
+            height: 120px;
+        }
+
+        .ticket-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .ticket-code, .seat, .price {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .label {
+            font-size: 12px;
+            color: var(--theme-light-text);
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--theme-text);
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .home-page-btn {
+            background-color: #284968;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .home-page-btn:hover {
+            background-color: #0D253F;
+        }
+    </style>
 {% endblock %}
