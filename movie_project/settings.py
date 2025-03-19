@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'movie_project.urls'
@@ -160,3 +161,5 @@ MOMO_PARTNER_CODE = "MOMO_TEST"
 MOMO_ACCESS_KEY = "F8BBA842ECF85"
 MOMO_SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
 MOMO_ENVIRONMENT = "test"  # "test" hoặc "production"
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
