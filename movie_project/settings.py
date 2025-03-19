@@ -95,13 +95,7 @@ CHANNEL_LAYERS = {
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'movie_project',
-        'USER': 'postgres',
-        'PASSWORD': '123',
-        'HOST': 'localhost',
-    }
+    'default': dj_database_url.config(default=os.getenv('postgresql://movie_project_user:wp2ycrsPTT6ptn0PKp8LBPjApaEZPM5u@dpg-cvdii6rqf0us73faujcg-a.oregon-postgres.render.com/movie_project'))
 }
 
 

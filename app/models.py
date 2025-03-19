@@ -75,16 +75,17 @@ class Seat(models.Model):
 
 
 class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    screening = models.ForeignKey(Screening, on_delete=models.CASCADE)
-    booking_time = models.DateTimeField(auto_now_add=True)
-    total_price = models.DecimalField(max_digits=6, decimal_places=2)
-    payment_method = models.CharField(max_length=50, default='card')
-    qr_code_uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Khách hàng
+    screening = models.ForeignKey("Screening", on_delete=models.CASCADE)  # Suất chiếu phim
+    booking_time = models.DateTimeField(auto_now_add=True)  # Thời gian đặt vé
+    total_price = models.DecimalField(max_digits=6, decimal_places=2)  # Tổng tiền
+    payment_method = models.CharField(max_length=50, default='card')  # Phương thức thanh toán
+    qr_code_uuid = models.UUIDField(default=uuid.uuid4, unique=True)  # UUID mã QR
+    is_used = models.BooleanField(default=False)  # Trạng thái vé (Đã sử dụng hay chưa)
 
     def generate_qr_code(self):
-        """Tạo QR code động mà không cần lưu vào file"""
-        qr = qrcode.make(str(self.qr_code_uuid))  # Tạo mã QR từ UUID
+        """Tạo QR code và trả về chuỗi base64 để hiển thị"""
+        qr = qrcode.make(str(self.qr_code_uuid))
 
         buffer = BytesIO()
         qr.save(buffer, format="PNG")

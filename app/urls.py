@@ -32,6 +32,8 @@ urlpatterns = [
     path('reset-password/', views.reset_password, name='reset_password'),
     path('profile/', views.profile_view, name='profile'),
     path('contact/', contact_view, name='contact'),
+    path("scan-qr/", views.scan_qr_page, name="scan_qr_page"),
+    path("check-ticket/", views.check_ticket, name="check_ticket"),
     
     # Các endpoint cho thanh toán qua Momo
     path('api/momo/create-payment/', views.create_momo_payment, name='create_momo_payment'),

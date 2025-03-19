@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quét mã QR</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+    <h2>Quét mã QR</h2>
+    <div id="reader" style="width: 300px;"></div>
+    <div id="result" style="margin-top: 20px; font-size: 18px;"></div>
+
+    <script>
+        function onScanSuccess(qrMessage) {
+            fetch(`/kiem-tra-ve?qr_code_uuid=${qrMessage}`)
+                .then(response => response.json())
+                .then(data => {
+                    let resultDiv = document.getElementById("result");
+                    if (data.valid) {
+                        resultDiv.innerHTML = `
+                            <p style="color: green;">✅ ${data.message}</p>
+                            <p>👤 <strong>Khách hàng:</strong> ${data.customer}</p>
+                            <p>🎬 <strong>Phim:</strong> ${data.movie}</p>
+                            <p>🕒 <strong>Giờ chiếu:</strong> ${data.time}</p>
+                            <p>🎟 <strong>Ghế:</strong> ${data.seat}</p>
+                            <p>💰 <strong>Tổng tiền:</strong> ${data.total_price}</p>
+                            <p>💳 <strong>Thanh toán:</strong> ${data.payment_method}</p>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <p style="color: red;">❌ ${data.message}</p>
+                            ${data.used_time ? `<p>🕒 Đã quét lúc: ${data.used_time}</p>` : ''}
+                        `;
+                    }
+                })
+                .catch(error => console.error("Lỗi kiểm tra vé:", error));
+        }
+
+        let html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            onScanSuccess
+        );
+    </script>
+</body>
+</html>

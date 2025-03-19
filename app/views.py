@@ -1129,3 +1129,41 @@ def check_and_lock_seats(request):
             'success': False,
             'message': str(e)
         }, status=500)
+
+
+def scan_qr_page(request):
+    """Hiển thị trang quét mã QR"""
+    return render(request, "scan_qr.html")
+
+
+def check_ticket(request):
+    """Kiểm tra vé sau khi quét mã QR"""
+    qr_code_uuid = request.GET.get("qr_code_uuid")
+
+    try:
+        booking = Booking.objects.get(qr_code_uuid=qr_code_uuid)
+
+        if booking.is_used:
+            return JsonResponse({
+                "valid": False,
+                "message": "❌ Vé đã sử dụng!",
+                "customer": booking.user.username,
+                "used_time": booking.booking_time.strftime("%H:%M, %d/%m/%Y"),
+            })
+
+        # Đánh dấu vé đã được sử dụng
+        booking.is_used = True
+        booking.save()
+
+        return JsonResponse({
+            "valid": True,
+            "message": "✅ Vé hợp lệ!",
+            "customer": booking.user.username,
+            "movie": booking.screening.movie,
+            "time": booking.screening.start_time.strftime("%H:%M, %d/%m/%Y"),
+            "seat": "A12",  # Cập nhật nếu có thông tin ghế
+            "total_price": f"{booking.total_price} VNĐ",
+            "payment_method": booking.payment_method,
+        })
+    except Booking.DoesNotExist:
+        return JsonResponse({"valid": False, "message": "🚫 Vé không hợp lệ!"})
