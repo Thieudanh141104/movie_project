@@ -1138,21 +1138,32 @@ def scan_qr_page(request):
 
 
 def check_ticket(request):
-    """Kiểm tra vé sau khi quét mã QR"""
-    qr_code_uuid = request.GET.get("qr_code_uuid")
+    """Kiểm tra vé dựa trên mã QR"""
+    uuid = request.GET.get("qr_code_uuid")
+    print("📌 UUID nhận được:", uuid)  # Debug UUID nhận được
+
+    if not uuid:
+        return JsonResponse({"valid": False, "message": "🚫 Mã QR không hợp lệ!"}, status=400)
 
     try:
-        booking = Booking.objects.get(qr_code_uuid=qr_code_uuid)
+        # Lấy booking từ UUID
+        booking = Booking.objects.get(qr_code_uuid=uuid)
+        print("✅ Vé tìm thấy:", booking)
 
+        # Lấy danh sách ghế từ UserSeat
+        booked_seats = UserSeat.objects.filter(booking=booking)
+        seat_numbers = [user_seat.seat.seat_number for user_seat in booked_seats]
+        print("🔹 Ghế đã đặt:", seat_numbers)
+
+        # Kiểm tra xem vé đã quét chưa
         if booking.is_used:
             return JsonResponse({
                 "valid": False,
-                "message": "❌ Vé đã sử dụng!",
-                "customer": booking.user.username,
-                "used_time": booking.booking_time.strftime("%H:%M, %d/%m/%Y"),
+                "message": "🚫 Vé đã được sử dụng!",
+                "used_time": booking.booking_time.strftime("%H:%M %d/%m/%Y"),
             })
 
-        # Đánh dấu vé đã được sử dụng
+        # Đánh dấu vé đã quét
         booking.is_used = True
         booking.save()
 
@@ -1160,11 +1171,13 @@ def check_ticket(request):
             "valid": True,
             "message": "✅ Vé hợp lệ!",
             "customer": booking.user.username,
-            "movie": booking.screening.movie,
-            "time": booking.screening.start_time.strftime("%H:%M, %d/%m/%Y"),
-            "seat": "A12",  # Cập nhật nếu có thông tin ghế
-            "total_price": f"{booking.total_price} VNĐ",
+            "movie": booking.screening.movie.title,
+            "time": booking.screening.screening_time.strftime("%H:%M %d/%m/%Y"),
+            "seat": ", ".join(seat_numbers) if seat_numbers else "❌ Không có ghế nào!",
+            "total_price": f"{booking.total_price} VND",
             "payment_method": booking.payment_method,
         })
+
     except Booking.DoesNotExist:
+        print("🚫 Vé không tồn tại!")
         return JsonResponse({"valid": False, "message": "🚫 Vé không hợp lệ!"})

@@ -13,7 +13,7 @@
 
     <script>
         function onScanSuccess(qrMessage) {
-            fetch(`/kiem-tra-ve?qr_code_uuid=${qrMessage}`)
+            fetch(`/check-ticket/?uuid=${qrMessage}`)
                 .then(response => response.json())
                 .then(data => {
                     let resultDiv = document.getElementById("result");
