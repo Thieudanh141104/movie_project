@@ -31,6 +31,7 @@ import urllib.parse
 import traceback
 from django.conf import settings
 from django.utils import timezone
+import pytz
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
@@ -1140,14 +1141,13 @@ def scan_qr_page(request):
 def check_ticket(request):
     """Kiểm tra vé dựa trên mã QR"""
     uuid = request.GET.get("qr_code_uuid") or request.GET.get("uuid")  # Hỗ trợ cả hai tham số
-    print("📌 UUID nhận được:", uuid)  # Debug UUID nhận được
+    print("📌 UUID nhận được:", uuid)
 
     if not uuid:
         return JsonResponse({"valid": False, "message": "🚫 Mã QR không hợp lệ!"}, status=400)
 
     try:
         # Kiểm tra UUID có đúng định dạng không
-        import uuid as uuid_lib
         try:
             uuid_obj = uuid_lib.UUID(uuid, version=4)
         except ValueError:
@@ -1158,19 +1158,22 @@ def check_ticket(request):
         booking = Booking.objects.get(qr_code_uuid=uuid)
         print("✅ Vé tìm thấy:", booking)
 
-        # Kiểm tra xem vé đã quét chưa
+        # Lấy múi giờ Việt Nam
+        vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+        now_vn = timezone.now().astimezone(vietnam_tz)
+
+        # Kiểm tra vé đã quét chưa
         if booking.is_used:
+            used_time_vn = booking.last_scanned_at.astimezone(vietnam_tz).strftime("%H:%M %d/%m/%Y") if booking.last_scanned_at else "Không rõ"
             return JsonResponse({
                 "valid": False,
                 "message": "🚫 Vé đã được sử dụng!",
-                "used_time": booking.last_scanned_at.strftime("%H:%M %d/%m/%Y") if booking.last_scanned_at else "Không rõ",
+                "used_time": used_time_vn,
             })
-
-        vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
 
         # Đánh dấu vé đã quét & lưu thời gian quét gần nhất
         booking.is_used = True
-        booking.last_scanned_at = timezone.now()
+        booking.last_scanned_at = now_vn
         booking.save()
 
         # Lấy danh sách ghế từ UserSeat
