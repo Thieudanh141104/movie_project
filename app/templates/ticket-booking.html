@@ -1379,9 +1379,7 @@
                     url: `/api/movies/${getParameterByName('movie_id')}`,
                     method: 'GET',
                     success: function(movie) {
-                        $('#movie-info').html(`
-                            <div><strong>Phim:</strong> ${movie.title}</div>
-                        `);
+                       $('.movie-title').text(`: ${movie.title}`);
                     }
                 });
 
@@ -1390,11 +1388,8 @@
                     url: `/api/screenings/${screeningId}`,
                     method: 'GET',
                     success: function(screening) {
-                        // Append to movie info
-                        $('#movie-info').append(`
-                            <div><strong>Ngày chiếu:</strong> ${screening.screening_date}</div>
-                            <div><strong>Giờ chiếu:</strong> ${screening.screening_time}</div>
-                        `);
+                        $('.screening_date').text(`: ${screening.screening_date}`);
+                        $('.screening_time').text(`: ${screening.screening_time}`);
                     }
                 });
 
@@ -1403,10 +1398,7 @@
                     url: `/api/rooms/${roomId}`,
                     method: 'GET',
                     success: function(room) {
-                        // Append to movie info
-                        $('#movie-info').append(`
-                            <div><strong>Phòng:</strong> ${room.name}</div>
-                        `);
+                        $('.room').text(`: ${room.name}`);
                     }
                 });
                 
