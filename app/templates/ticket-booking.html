@@ -1379,7 +1379,7 @@
                     url: `/api/movies/${getParameterByName('movie_id')}`,
                     method: 'GET',
                     success: function(movie) {
-                       $('.movie-title').text(`: ${movie.title}`);
+                       $('.movie-title').text(`${movie.title}`);
                     }
                 });
 
@@ -1388,8 +1388,8 @@
                     url: `/api/screenings/${screeningId}`,
                     method: 'GET',
                     success: function(screening) {
-                        $('.screening_date').text(`: ${screening.screening_date}`);
-                        $('.screening_time').text(`: ${screening.screening_time}`);
+                        $('.screening_date').text(`${screening.screening_date}`);
+                        $('.screening_time').text(`${screening.screening_time}`);
                     }
                 });
 
@@ -1398,7 +1398,7 @@
                     url: `/api/rooms/${roomId}`,
                     method: 'GET',
                     success: function(room) {
-                        $('.room').text(`: ${room.name}`);
+                        $('.room').text(`${room.name}`);
                     }
                 });
                 

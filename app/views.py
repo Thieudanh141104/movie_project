@@ -562,213 +562,46 @@ def contact_view(request):
 @api_view(['POST'])
 def create_momo_payment(request):
     """
-    Tạo yêu cầu thanh toán qua Momo và trả về URL để chuyển hướng
+    Bỏ qua API Momo, xác nhận đặt vé ngay lập tức
     """
     try:
-        # Kiểm tra người dùng đã đăng nhập chưa
         user_id = request.session.get('current_user_id')
-        print(f"Current user_id from session: {user_id}")
-        
         if not user_id:
             return Response({'error': 'Bạn cần đăng nhập để thanh toán'}, status=401)
-        
-        # ========= XỬ LÝ DỮ LIỆU TỪ REQUEST =========
-        # Cách mới: Sử dụng request.data của DRF một cách an toàn
+
+        request_data = request.data
+        amount = int(float(request_data.get('amount', 0)))
+        extra_data = request_data.get('extraData', '{}')
+
+        # Giải mã extraData
         try:
-            # Lấy dữ liệu từ DRF request.data
-            request_data = request.data
-            print(f"request.data: {request_data}")
-            
-            if not request_data:
-                # Fallback nếu request.data trống
-                return Response({'error': 'Không có dữ liệu được gửi trong request'}, status=400)
-                
-            # Xử lý request data
-            amount = int(float(request_data.get('amount', 0)))
-            order_info = request_data.get('orderInfo', 'Thanh toán vé xem phim')
-            extra_data = request_data.get('extraData', '')
-            
-            print(f"Đã xử lý: amount={amount}, order_info={order_info}")
-            
-        except ValueError as e:
-            print(f"Lỗi định dạng số: {str(e)}")
-            return Response({'error': f'Giá trị không hợp lệ: {str(e)}'}, status=400)
-        except Exception as e:
-            print(f"Lỗi đọc dữ liệu request: {str(e)}")
-            return Response({'error': f'Không thể đọc dữ liệu yêu cầu: {str(e)}'}, status=400)
-            
-        # ========= XỬ LÝ EXTRA DATA =========
-        # Xử lý extraData - giải mã nếu là chuỗi JSON
-        extra_data_parsed = None
-        try:
-            if isinstance(extra_data, str):
-                extra_data_parsed = json.loads(extra_data)
-            else:
-                extra_data_parsed = extra_data
-                
-            print(f"Parsed extraData: {extra_data_parsed}")
-            
-        except Exception as e:
-            print(f"Error parsing extraData: {str(e)}")
-            extra_data_parsed = {'raw': str(extra_data)}
-            
-        # ========= KIỂM TRA THÔNG TIN =========
-        # Kiểm tra thông tin ghế và lịch chiếu
+            extra_data_parsed = json.loads(extra_data)
+        except json.JSONDecodeError:
+            return Response({'error': 'Dữ liệu extraData không hợp lệ'}, status=400)
+
         screening_id = extra_data_parsed.get('screening_id')
         room_id = extra_data_parsed.get('room_id')
         seats = extra_data_parsed.get('seats', [])
-        
+
         if not screening_id or not room_id or not seats:
-            return Response({'error': 'Thiếu thông tin cần thiết cho thanh toán'}, status=400)
-            
-        # Kiểm tra lịch chiếu có tồn tại không
-        try:
-            screening = Screening.objects.get(id=screening_id)
-            print(f"Found screening: {screening}")
-        except Screening.DoesNotExist:
-            return Response({'error': 'Lịch chiếu không tồn tại'}, status=404)
-        
-        # ========= XỬ LÝ AMOUNT =========
-        # Nếu amount = 0, tính lại từ giá vé
-        if amount <= 0 and seats:
-            try:
-                # Lấy tổng giá vé từ các ghế được chọn
-                selected_seats = Seat.objects.filter(
-                    room_id=room_id,
-                    seat_number__in=seats
-                )
-                if selected_seats.exists():
-                    # Tính tổng giá vé
-                    amount = sum(float(seat.ticket_price) * 1000 for seat in selected_seats)
-                    print(f"Calculated amount from seats: {amount}")
-                    
-                    if amount <= 0:
-                        # Nếu vẫn = 0, dùng giá trị mặc định
-                        amount = len(seats) * 50000  # 50,000 VND mỗi ghế
-                        print(f"Using default price: {amount}")
-            except Exception as e:
-                print(f"Error calculating amount from seats: {str(e)}")
-                # Sử dụng giá mặc định nếu có lỗi
-                amount = len(seats) * 50000  # 50,000 VND mỗi ghế
-                print(f"Using default price after error: {amount}")
-        
-        # Vẫn kiểm tra nhưng bây giờ chúng ta đã có biện pháp phòng ngừa
-        if amount <= 0:
-            return Response({'error': 'Số tiền thanh toán không hợp lệ'}, status=400)
-        
-        # ========= TẠO THÔNG TIN THANH TOÁN =========
-        # Tạo mã đơn hàng ngẫu nhiên nhưng có cấu trúc rõ ràng
+            return Response({'error': 'Thiếu thông tin cần thiết cho đặt vé'}, status=400)
+
+        # Tạo mã đơn hàng giả lập
         timestamp = int(datetime.now().timestamp())
         order_id = f"MOVIE_{user_id}_{timestamp}_{uuid.uuid4().hex[:8]}"
-        
-        # URL callback sau khi thanh toán xong
-        redirect_url = request.build_absolute_uri(reverse('momo_return'))
-        ipn_url = request.build_absolute_uri(reverse('momo_ipn'))
-        
-        print(f"Redirect URL: {redirect_url}")
-        print(f"IPN URL: {ipn_url}")
-        
-        # Các thông số cần thiết để gọi API Momo
-        partner_code = settings.MOMO_PARTNER_CODE if hasattr(settings, 'MOMO_PARTNER_CODE') else "MOMO_TEST"
-        access_key = settings.MOMO_ACCESS_KEY if hasattr(settings, 'MOMO_ACCESS_KEY') else "F8BBA842ECF85"
-        secret_key = settings.MOMO_SECRET_KEY if hasattr(settings, 'MOMO_SECRET_KEY') else "K951B6PE1waDMi640xX08PD3vg6EkVlz"
-        
-        # Chuẩn bị extraData để lưu vào Momo
-        momo_extra_data = json.dumps({
-            'user_id': user_id,
-            'screening_id': screening_id,
-            'room_id': room_id,
-            'seats': seats,
-            'amount': amount
-        })
-        
-        # ========= THỰC HIỆN TẠO GIAO DỊCH =========
-        # Lưu thông tin yêu cầu thanh toán vào session trước
-        request.session['payment_request'] = {
-            'order_id': order_id,
-            'amount': amount,
-            'screening_id': screening_id,
-            'room_id': room_id,
-            'seats': seats,
-            'user_id': user_id,
-            'timestamp': timestamp
-        }
-        
-        # Nếu chạy trong môi trường phát triển, trả về mô phỏng để test
-        if request.get_host() in ['localhost:8000', '127.0.0.1:8000']:
-            print("Simulating Momo payment in development mode...")
-            
-            # Trả về giả lập URL thanh toán cho môi trường phát triển
-            mock_url = request.build_absolute_uri(f"/api/momo/return?resultCode=0&orderId={order_id}&message=Success")
-            return Response({
-                'payUrl': mock_url,
-                'orderId': order_id,
-                'message': 'Mô phỏng thanh toán thành công (môi trường phát triển)'
-            })
-        
-        # Dữ liệu gửi đến Momo
-        encoded_extra_data = urllib.parse.quote(momo_extra_data)
-        raw_data = {
-            'partnerCode': partner_code,
-            'accessKey': access_key,
-            'requestId': order_id,
-            'amount': amount,
+
+        # ✅ **Bỏ qua Momo, xác nhận đặt vé ngay lập tức**
+        print(f"🚀 Bỏ qua Momo, đặt vé thành công: {order_id} cho user {user_id}")
+
+        # ✅ **Giả lập trạng thái thanh toán thành công**
+        return Response({
             'orderId': order_id,
-            'orderInfo': order_info,
-            'returnUrl': redirect_url,
-            'notifyUrl': ipn_url,
-            'requestType': 'captureMoMoWallet',
-            'extraData': encoded_extra_data
-        }
-        
-        # Tạo chữ ký (signature)
-        raw_signature = "accessKey=" + access_key + "&amount=" + str(amount) + "&extraData=" + \
-                     encoded_extra_data + "&orderId=" + order_id + "&orderInfo=" + \
-                     raw_data['orderInfo'] + "&partnerCode=" + partner_code + "&requestId=" + \
-                     order_id + "&returnUrl=" + redirect_url
-        
-        h = hmac.new(bytes(secret_key, 'utf-8'), bytes(raw_signature, 'utf-8'), hashlib.sha256)
-        signature = h.hexdigest()
-        raw_data['signature'] = signature
-        
-        # Gọi API của Momo
-        momo_endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
-        
-        try:
-            print(f"Calling Momo API with data: {raw_data}")
-            
-            response = requests.post(momo_endpoint, json=raw_data)
-            print(f"Momo API response status: {response.status_code}")
-            print(f"Momo API response text: {response.text}")
-            
-            if response.status_code == 200:
-                response_data = response.json()
-                
-                # Log thông tin giao dịch
-                print(f"Payment request created: {order_id} for user {user_id}, amount: {amount}")
-                
-                # Trả về URL thanh toán và các thông tin liên quan
-                return Response({
-                    'payUrl': response_data.get('payUrl'),
-                    'orderId': order_id,
-                    'message': response_data.get('message')
-                })
-            else:
-                error_message = f"Momo API error: {response.status_code} - {response.text}"
-                print(error_message)
-                return Response({'error': 'Không thể kết nối với Momo', 'details': error_message}, status=502)
-        except requests.exceptions.RequestException as e:
-            error_message = f"Network error when calling Momo API: {str(e)}"
-            print(error_message)
-            return Response({'error': 'Lỗi mạng khi kết nối đến Momo', 'details': error_message}, status=500)
-        except Exception as e:
-            error_message = f"Exception when calling Momo API: {str(e)}"
-            print(error_message)
-            return Response({'error': str(e), 'details': error_message}, status=500)
+            'message': 'Thanh toán thành công (bỏ qua Momo)',
+            'status': 'success'
+        }, status=200)
+
     except Exception as e:
-        error_message = f"Exception in create_momo_payment: {str(e)}"
-        print(error_message)
-        return Response({'error': str(e), 'details': error_message}, status=400)
+        return Response({'error': str(e)}, status=500)
 
 @api_view(['GET'])
 def momo_return(request):
