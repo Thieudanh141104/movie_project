@@ -30,6 +30,7 @@ import requests
 import urllib.parse
 import traceback
 from django.conf import settings
+from django.utils import timezone
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
@@ -1167,7 +1168,7 @@ def check_ticket(request):
 
         # Đánh dấu vé đã quét & lưu thời gian quét gần nhất
         booking.is_used = True
-        booking.last_scanned_at = now()
+        booking.last_scanned_at = timezone.now()
         booking.save()
 
         # Lấy danh sách ghế từ UserSeat
