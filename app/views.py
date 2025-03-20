@@ -1166,6 +1166,8 @@ def check_ticket(request):
                 "used_time": booking.last_scanned_at.strftime("%H:%M %d/%m/%Y") if booking.last_scanned_at else "Không rõ",
             })
 
+        vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+
         # Đánh dấu vé đã quét & lưu thời gian quét gần nhất
         booking.is_used = True
         booking.last_scanned_at = timezone.now()

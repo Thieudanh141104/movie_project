@@ -11,38 +11,53 @@
     <div id="reader" style="width: 300px;"></div>
     <div id="result" style="margin-top: 20px; font-size: 18px;"></div>
 
-    <script>
-        function onScanSuccess(qrMessage) {
-            fetch(`/check-ticket/?uuid=${qrMessage}`)
-                .then(response => response.json())
-                .then(data => {
-                    let resultDiv = document.getElementById("result");
-                    if (data.valid) {
-                        resultDiv.innerHTML = `
-                            <p style="color: green;">✅ ${data.message}</p>
-                            <p>👤 <strong>Khách hàng:</strong> ${data.customer}</p>
-                            <p>🎬 <strong>Phim:</strong> ${data.movie}</p>
-                            <p>🕒 <strong>Giờ chiếu:</strong> ${data.time}</p>
-                            <p>🎟 <strong>Ghế:</strong> ${data.seat}</p>
-                            <p>💰 <strong>Tổng tiền:</strong> ${data.total_price}</p>
-                            <p>💳 <strong>Thanh toán:</strong> ${data.payment_method}</p>
-                        `;
-                    } else {
-                        resultDiv.innerHTML = `
-                            <p style="color: red;">❌ ${data.message}</p>
-                            ${data.used_time ? `<p>🕒 Đã quét lúc: ${data.used_time}</p>` : ''}
-                        `;
-                    }
-                })
-                .catch(error => console.error("Lỗi kiểm tra vé:", error));
+<script>
+    let lastScannedUUID = ""; // Lưu UUID quét gần nhất
+    let scanningBlocked = false; // Ngăn quét liên tục
+
+    function onScanSuccess(qrMessage) {
+        if (scanningBlocked || qrMessage === lastScannedUUID) {
+            return; // Bỏ qua nếu mã trùng hoặc đang trong thời gian chờ
         }
 
-        let html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            onScanSuccess
-        );
-    </script>
+        lastScannedUUID = qrMessage; // Cập nhật UUID quét gần nhất
+        scanningBlocked = true; // Chặn quét tiếp trong thời gian chờ
+
+        fetch(`/check-ticket/?uuid=${qrMessage}`)
+            .then(response => response.json())
+            .then(data => {
+                let resultDiv = document.getElementById("result");
+                if (data.valid) {
+                    resultDiv.innerHTML = `
+                        <p style="color: green;">✅ ${data.message}</p>
+                        <p>👤 <strong>Khách hàng:</strong> ${data.customer}</p>
+                        <p>🎬 <strong>Phim:</strong> ${data.movie}</p>
+                        <p>🕒 <strong>Giờ chiếu:</strong> ${data.time}</p>
+                        <p>🎟 <strong>Ghế:</strong> ${data.seat}</p>
+                        <p>💰 <strong>Tổng tiền:</strong> ${data.total_price}</p>
+                        <p>💳 <strong>Thanh toán:</strong> ${data.payment_method}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p style="color: red;">❌ ${data.message}</p>
+                        ${data.used_time ? `<p>🕒 Đã quét lúc: ${data.used_time}</p>` : ''}
+                    `;
+                }
+
+                // Cho phép quét lại sau 3 giây
+                setTimeout(() => {
+                    scanningBlocked = false;
+                }, 3000);
+            })
+            .catch(error => console.error("Lỗi kiểm tra vé:", error));
+    }
+
+    let html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess
+    );
+</script>
 </body>
 </html>
