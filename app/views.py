@@ -560,28 +560,20 @@ def contact_view(request):
     return render(request, 'contact.html')
 
 @api_view(['POST'])
-def create_momo_payment(request):
+def create_booking_direct(request):
     """
-    Bỏ qua API Momo, xác nhận đặt vé ngay lập tức
+    Bỏ qua Momo, xác nhận đặt vé ngay lập tức
     """
     try:
         user_id = request.session.get('current_user_id')
         if not user_id:
-            return Response({'error': 'Bạn cần đăng nhập để thanh toán'}, status=401)
+            return Response({'error': 'Bạn cần đăng nhập để đặt vé'}, status=401)
 
         request_data = request.data
         amount = int(float(request_data.get('amount', 0)))
-        extra_data = request_data.get('extraData', '{}')
-
-        # Giải mã extraData
-        try:
-            extra_data_parsed = json.loads(extra_data)
-        except json.JSONDecodeError:
-            return Response({'error': 'Dữ liệu extraData không hợp lệ'}, status=400)
-
-        screening_id = extra_data_parsed.get('screening_id')
-        room_id = extra_data_parsed.get('room_id')
-        seats = extra_data_parsed.get('seats', [])
+        screening_id = request_data.get('screening_id')
+        room_id = request_data.get('room_id')
+        seats = request_data.get('seats', [])
 
         if not screening_id or not room_id or not seats:
             return Response({'error': 'Thiếu thông tin cần thiết cho đặt vé'}, status=400)
@@ -590,267 +582,41 @@ def create_momo_payment(request):
         timestamp = int(datetime.now().timestamp())
         order_id = f"MOVIE_{user_id}_{timestamp}_{uuid.uuid4().hex[:8]}"
 
-        # ✅ **Bỏ qua Momo, xác nhận đặt vé ngay lập tức**
-        print(f"🚀 Bỏ qua Momo, đặt vé thành công: {order_id} cho user {user_id}")
+        # Tạo booking mới
+        booking = Booking.objects.create(
+            user_id=user_id,
+            screening_id=screening_id,
+            total_price=amount,
+            payment_method='direct'
+        )
 
-        # ✅ **Giả lập trạng thái thanh toán thành công**
+        # Cập nhật trạng thái ghế thành 'unavailable'
+        seats_to_update = Seat.objects.filter(
+            seat_number__in=seats,
+            room_id=room_id,
+            screening_id=screening_id
+        )
+        seats_to_update.update(status='unavailable')
+
+        # Liên kết ghế với booking
+        for seat in seats_to_update:
+            UserSeat.objects.create(
+                booking=booking,
+                seat=seat
+            )
+
+        print(f"🚀 Đặt vé thành công: {order_id} cho user {user_id}")
+
+        # Chuyển hướng đến e-ticket
         return Response({
             'orderId': order_id,
-            'message': 'Thanh toán thành công (bỏ qua Momo)',
-            'status': 'success'
+            'message': 'Đặt vé thành công',
+            'status': 'success',
+            'booking_id': booking.id
         }, status=200)
 
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-
-@api_view(['GET'])
-def momo_return(request):
-    """
-    Xử lý kết quả trả về từ Momo sau khi người dùng thanh toán xong
-    """
-    try:
-        # Lấy các tham số trả về từ Momo
-        result_code = request.GET.get('resultCode')
-        order_id = request.GET.get('orderId')
-        message = request.GET.get('message', '')
-        
-        print(f"Momo return callback received: result_code={result_code}, order_id={order_id}, message={message}")
-        print(f"Full query params: {dict(request.GET.items())}")
-        
-        # Lấy thông tin thanh toán từ session
-        payment_request = request.session.get('payment_request', {})
-        print(f"Payment request from session: {payment_request}")
-        
-        user_id = payment_request.get('user_id')
-        screening_id = payment_request.get('screening_id')
-        room_id = payment_request.get('room_id')
-        seats = payment_request.get('seats', [])
-        amount = payment_request.get('amount', 0)
-        
-        # Kiểm tra kết quả thanh toán
-        if result_code == '0':  # Thanh toán thành công
-            print("Payment successful, processing booking...")
-            try:
-                # Tự động xử lý tạo booking nếu thanh toán thành công
-                if user_id and screening_id and room_id and seats:
-                    print(f"Creating booking for user={user_id}, screening={screening_id}, room={room_id}, seats={seats}")
-                    
-                    # Debug: Kiểm tra tất cả ghế trong phòng
-                    all_seats_in_room = Seat.objects.filter(room_id=room_id)
-                    print(f"All seats in room {room_id}: {list(all_seats_in_room.values_list('seat_number', flat=True))}")
-                    
-                    # Khóa và cập nhật trạng thái ghế
-                    seats_to_update = Seat.objects.filter(
-                        seat_number__in=seats,
-                        room_id=room_id,
-                        screening_id=screening_id
-                    )
-                    
-                    print(f"Found {seats_to_update.count()} seats to update")
-                    print(f"Query parameters: seat_number__in={seats}, room_id={room_id}, screening_id={screening_id}")
-                    
-                    # Tạo booking mới trước
-                    booking = Booking.objects.create(
-                        user_id=user_id,
-                        screening_id=screening_id,
-                        total_price=amount / 1000,  # Chuyển đổi lại từ VND sang đơn vị hiển thị (.000đ)
-                        payment_method='momo'
-                    )
-                    
-                    print(f"Created booking with ID: {booking.id}")
-                    
-                    # Nếu không tìm thấy ghế, kiểm tra ghế theo chỉ room_id
-                    if seats_to_update.count() == 0:
-                        print("Không tìm thấy ghế với screening_id, thử tìm ghế chỉ với room_id")
-                        room_seats = Seat.objects.filter(
-                            seat_number__in=seats,
-                            room_id=room_id
-                        )
-                        print(f"Tìm thấy {room_seats.count()} ghế chỉ với room_id")
-                        
-                        # Nếu tìm thấy ghế trong phòng, cập nhật screening_id cho các ghế này
-                        if room_seats.exists():
-                            print(f"Cập nhật screening_id={screening_id} cho các ghế đã tìm thấy")
-                            for seat in room_seats:
-                                # Tạo bản sao ghế mới với screening_id mới
-                                try:
-                                    seat_copy = Seat.objects.get(
-                                        seat_number=seat.seat_number,
-                                        room_id=room_id,
-                                        screening_id=screening_id
-                                    )
-                                    print(f"Ghế {seat.seat_number} đã tồn tại với screening_id={screening_id}")
-                                except Seat.DoesNotExist:
-                                    seat_copy = Seat.objects.create(
-                                        seat_number=seat.seat_number,
-                                        room_id=room_id,
-                                        screening_id=screening_id,
-                                        status='available',
-                                        ticket_price=seat.ticket_price
-                                    )
-                                    print(f"Đã tạo ghế mới {seat.seat_number} với screening_id={screening_id}")
-                            
-                            # Tìm lại ghế sau khi đã cập nhật
-                            seats_to_update = Seat.objects.filter(
-                                seat_number__in=seats,
-                                room_id=room_id,
-                                screening_id=screening_id
-                            )
-                            print(f"Sau khi cập nhật, tìm thấy {seats_to_update.count()} ghế để cập nhật")
-                    
-                    # Nếu có ghế, cập nhật trạng thái và liên kết với booking
-                    if seats_to_update:
-                        # Cập nhật trạng thái ghế thành 'unavailable'
-                        seats_to_update.update(status='unavailable')
-                        
-                        # Liên kết ghế với booking
-                        for seat in seats_to_update:
-                            user_seat = UserSeat.objects.create(
-                                booking=booking,
-                                seat=seat
-                            )
-                            print(f"Linked seat {seat.seat_number} to booking")
-                    else:
-                        # Tạo ghế mới cho booking nếu không tìm thấy ghế nào
-                        print("Không tìm thấy ghế nào sau khi cố gắng tạo. Tạo ghế mới cho booking.")
-                        for seat_number in seats:
-                            # Tạo ghế mới
-                            new_seat = Seat.objects.create(
-                                seat_number=seat_number,
-                                room_id=room_id,
-                                screening_id=screening_id,
-                                status='unavailable',
-                                ticket_price=50  # Giá mặc định
-                            )
-                            print(f"Tạo ghế mới {seat_number} cho booking.")
-                            
-                            # Liên kết ghế với booking
-                            user_seat = UserSeat.objects.create(
-                                booking=booking,
-                                seat=new_seat
-                            )
-                            print(f"Linked new seat {seat_number} to booking")
-                    
-                    # Xóa thông tin từ session
-                    if 'payment_request' in request.session:
-                        del request.session['payment_request']
-                        print("Deleted payment_request from session")
-                    
-                    # Chuyển hướng đến trang e-ticket
-                    redirect_url = f'/e-ticket?booking_id={booking.id}'
-                    print(f"Redirecting to: {redirect_url}")
-                    return redirect(redirect_url)
-                else:
-                    missing_info = []
-                    if not user_id: missing_info.append("user_id")
-                    if not screening_id: missing_info.append("screening_id")
-                    if not room_id: missing_info.append("room_id")
-                    if not seats: missing_info.append("seats")
-                    
-                    print(f"Missing booking information: {', '.join(missing_info)}")
-                    messages.error(request, f"Thiếu thông tin cần thiết để tạo đơn hàng: {', '.join(missing_info)}")
-                    return redirect('payment_failed')
-            except Exception as e:
-                print(f"Error creating booking after Momo payment: {str(e)}")
-                print(f"Traceback: {traceback.format_exc()}")
-                messages.error(request, f"Thanh toán thành công nhưng không thể tạo đơn hàng: {str(e)}")
-                return redirect('payment_failed')
-                
-            # Thanh toán thành công nhưng không có đủ thông tin để tạo booking
-            messages.success(request, 'Thanh toán thành công! Đang tạo đơn hàng...')
-            return redirect('payment_success')
-        else:
-            # Thanh toán thất bại
-            error_message = f"Thanh toán không thành công: {message} (Mã lỗi: {result_code})"
-            print(f"Payment failed: {error_message}")
-            messages.error(request, error_message)
-            return redirect('payment_failed')
-    except Exception as e:
-        print(f"Exception in momo_return: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")
-        messages.error(request, f"Lỗi xử lý kết quả thanh toán: {str(e)}")
-        return redirect('payment_failed')
-
-@api_view(['POST'])
-def momo_ipn(request):
-    """
-    Xử lý thông báo thanh toán từ Momo (IPN - Instant Payment Notification)
-    """
-    try:
-        # Parse dữ liệu IPN từ Momo
-        data = json.loads(request.body)
-        
-        # Lấy các thông tin cần thiết
-        result_code = data.get('resultCode')
-        order_id = data.get('orderId')
-        transaction_id = data.get('transId')
-        amount = data.get('amount')
-        extra_data = data.get('extraData', '')
-        
-        # Giải mã extraData
-        try:
-            decoded_extra_data = urllib.parse.unquote(extra_data)
-            extra_data_json = json.loads(decoded_extra_data)
-            user_id = extra_data_json.get('user_id')
-            screening_id = extra_data_json.get('screening_id')
-            room_id = extra_data_json.get('room_id')
-            seats = extra_data_json.get('seats', [])
-        except:
-            extra_data_json = {}
-            user_id = None
-            screening_id = None
-            room_id = None
-            seats = []
-        
-        # Kiểm tra kết quả thanh toán
-        if result_code == '0':  # Thanh toán thành công
-            # Xử lý tương tự như trong hàm momo_return, nhưng không chuyển hướng
-            try:
-                if user_id and screening_id and room_id and seats:
-                    # Kiểm tra xem booking đã tồn tại chưa
-                    existing_booking = Booking.objects.filter(
-                        user_id=user_id,
-                        screening_id=screening_id,
-                        payment_method='momo'
-                    ).order_by('-booking_time').first()
-                    
-                    if existing_booking:
-                        # Nếu đã có booking, không tạo lại
-                        return Response({'message': 'Booking already exists', 'booking_id': existing_booking.id})
-                    
-                    # Cập nhật trạng thái ghế
-                    seats_to_update = Seat.objects.filter(
-                        seat_number__in=seats,
-                        room_id=room_id,
-                        screening_id=screening_id
-                    )
-                    
-                    seats_to_update.update(status='unavailable')
-                    
-                    # Tạo booking mới
-                    booking = Booking.objects.create(
-                        user_id=user_id,
-                        screening_id=screening_id,
-                        total_price=amount / 1000,
-                        payment_method='momo'
-                    )
-                    
-                    # Liên kết ghế với booking
-                    for seat in seats_to_update:
-                        UserSeat.objects.create(
-                            booking=booking,
-                            seat=seat
-                        )
-                    
-                    return Response({'message': 'Success', 'booking_id': booking.id})
-            except Exception as e:
-                print(f"IPN Error: {str(e)}")
-                return Response({'message': f'Error: {str(e)}'})
-        
-        return Response({'message': 'Received'})
-    except Exception as e:
-        print(f"IPN Exception: {str(e)}")
-        return Response({'message': f'Exception: {str(e)}'})
 
 @api_view(['POST'])
 def check_and_lock_seats(request):
