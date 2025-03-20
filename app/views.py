@@ -32,6 +32,7 @@ import traceback
 from django.conf import settings
 from django.utils import timezone
 import pytz
+import uuid as uuid_lib
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
