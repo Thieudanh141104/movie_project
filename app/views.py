@@ -1162,18 +1162,6 @@ def check_ticket(request):
         seat_numbers = [user_seat.seat.seat_number for user_seat in booked_seats]
         print("🔹 Ghế đã đặt:", seat_numbers)
 
-        # Kiểm tra xem vé đã quét chưa
-        if booking.is_used:
-            return JsonResponse({
-                "valid": False,
-                "message": "🚫 Vé đã được sử dụng!",
-                "used_time": booking.booking_time.strftime("%H:%M %d/%m/%Y"),
-            })
-
-        # Đánh dấu vé đã quét
-        booking.is_used = True
-        booking.save()
-
         return JsonResponse({
             "valid": True,
             "message": "✅ Vé hợp lệ!",
