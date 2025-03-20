@@ -1189,7 +1189,7 @@ def check_ticket(request):
             "movie": booking.screening.movie.title,
             "time": f"{booking.screening.screening_time.strftime('%H:%M')} {booking.screening.screening_date.strftime('%d/%m/%Y')}",
             "seat": ", ".join(seat_numbers) if seat_numbers else "❌ Không có ghế nào!",
-            "total_price": f"{booking.total_price} VND",
+            "total_price": f"{booking.total_price}0đ",
             "payment_method": booking.payment_method,
         })
 
