@@ -1161,7 +1161,7 @@ def check_ticket(request):
 
         # Lấy múi giờ Việt Nam
         vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
-        now_vn = timezone.now().astimezone(vietnam_tz)
+        now_utc = timezone.now()  # Lấy thời gian hiện tại theo UTC
 
         # Kiểm tra vé đã quét chưa
         if booking.is_used:
@@ -1172,9 +1172,9 @@ def check_ticket(request):
                 "used_time": used_time_vn,
             })
 
-        # Đánh dấu vé đã quét & lưu thời gian quét gần nhất
+        # Đánh dấu vé đã quét & lưu thời gian quét gần nhất (Lưu theo UTC)
         booking.is_used = True
-        booking.last_scanned_at = now_vn
+        booking.last_scanned_at = now_utc  # ✅ Lưu theo UTC
         booking.save()
 
         # Lấy danh sách ghế từ UserSeat
@@ -1191,6 +1191,7 @@ def check_ticket(request):
             "seat": ", ".join(seat_numbers) if seat_numbers else "❌ Không có ghế nào!",
             "total_price": f"{booking.total_price}0đ",
             "payment_method": booking.payment_method,
+            "scanned_at": now_utc.astimezone(vietnam_tz).strftime("%H:%M %d/%m/%Y"),  # Hiển thị giờ VN
         })
 
     except Booking.DoesNotExist:
