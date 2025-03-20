@@ -1137,16 +1137,27 @@ def scan_qr_page(request):
     return render(request, "scan_qr.html")
 
 
+from django.http import JsonResponse
+from movie_app.models import Booking, UserSeat  # Thay thế bằng tên app thực tế
+
 def check_ticket(request):
     """Kiểm tra vé dựa trên mã QR"""
-    uuid = request.GET.get("qr_code_uuid")
+    uuid = request.GET.get("qr_code_uuid") or request.GET.get("uuid")  # Hỗ trợ cả hai tham số
     print("📌 UUID nhận được:", uuid)  # Debug UUID nhận được
 
     if not uuid:
         return JsonResponse({"valid": False, "message": "🚫 Mã QR không hợp lệ!"}, status=400)
 
     try:
-        # Lấy booking từ UUID
+        # Kiểm tra UUID có đúng định dạng không
+        import uuid as uuid_lib
+        try:
+            uuid_obj = uuid_lib.UUID(uuid, version=4)
+        except ValueError:
+            print("🚫 UUID không hợp lệ!")
+            return JsonResponse({"valid": False, "message": "🚫 UUID không đúng định dạng!"}, status=400)
+
+        # Tìm booking từ UUID
         booking = Booking.objects.get(qr_code_uuid=uuid)
         print("✅ Vé tìm thấy:", booking)
 
