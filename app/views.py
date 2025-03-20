@@ -1136,10 +1136,6 @@ def scan_qr_page(request):
     """Hiển thị trang quét mã QR"""
     return render(request, "scan_qr.html")
 
-
-from django.http import JsonResponse
-from movie_app.models import Booking, UserSeat  # Thay thế bằng tên app thực tế
-
 def check_ticket(request):
     """Kiểm tra vé dựa trên mã QR"""
     uuid = request.GET.get("qr_code_uuid") or request.GET.get("uuid")  # Hỗ trợ cả hai tham số
