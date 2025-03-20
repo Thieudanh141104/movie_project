@@ -82,6 +82,7 @@ class Booking(models.Model):
     payment_method = models.CharField(max_length=50, default='card')  # Phương thức thanh toán
     qr_code_uuid = models.UUIDField(default=uuid.uuid4, unique=True)  # UUID mã QR
     is_used = models.BooleanField(default=False)  # Trạng thái vé (Đã sử dụng hay chưa)
+    last_scanned_at = models.DateTimeField(null=True, blank=True)  # Thời gian quét gần nhất
 
     def generate_qr_code(self):
         """Tạo QR code và trả về chuỗi base64 để hiển thị"""

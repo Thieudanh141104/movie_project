@@ -1157,6 +1157,19 @@ def check_ticket(request):
         booking = Booking.objects.get(qr_code_uuid=uuid)
         print("✅ Vé tìm thấy:", booking)
 
+        # Kiểm tra xem vé đã quét chưa
+        if booking.is_used:
+            return JsonResponse({
+                "valid": False,
+                "message": "🚫 Vé đã được sử dụng!",
+                "used_time": booking.last_scanned_at.strftime("%H:%M %d/%m/%Y") if booking.last_scanned_at else "Không rõ",
+            })
+
+        # Đánh dấu vé đã quét & lưu thời gian quét gần nhất
+        booking.is_used = True
+        booking.last_scanned_at = now()
+        booking.save()
+
         # Lấy danh sách ghế từ UserSeat
         booked_seats = UserSeat.objects.filter(booking=booking)
         seat_numbers = [user_seat.seat.seat_number for user_seat in booked_seats]
@@ -1167,7 +1180,7 @@ def check_ticket(request):
             "message": "✅ Vé hợp lệ!",
             "customer": booking.user.username,
             "movie": booking.screening.movie.title,
-            "time": booking.screening.screening_time.strftime("%H:%M %d/%m/%Y"),
+            "time": f"{booking.screening.screening_time.strftime('%H:%M')} {booking.screening.screening_date.strftime('%d/%m/%Y')}",
             "seat": ", ".join(seat_numbers) if seat_numbers else "❌ Không có ghế nào!",
             "total_price": f"{booking.total_price} VND",
             "payment_method": booking.payment_method,
