@@ -1,88 +1,103 @@
 <!DOCTYPE html>
-    <html lang="en">
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Reset Password</title>
-        <style>
-            button {
-                font-family: 'Roboto', sans-serif;
-                text-transform: uppercase;
-                outline: 0;
-                background: #6abfd0;
-                width: 100%;
-                border: 0;
-                padding: 15px;
-                color: #FFFFFF;
-                font-size: 14px;
-                cursor: pointer;
-            }
-
-            button:hover,
-            button:active,
-            button:focus {
-                background: #538c97;
-            }
-
-            .formngoai {
-                width: 360px;
-                position: relative;
-                z-index: 1;
-                background: #FFFFFF;
-                max-width: 360px;
-                margin: 0 auto;
-                padding: 45px;
-                text-align: center;
-                box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
-                border-radius: 2%;
-            }
-
-            .form-control {
-                font-family: 'Roboto', sans-serif;
-                outline: 0;
-                background: #f2f8ff;
-                width: 100%;
-                border: 0;
-                margin: 0 0 15px;
-                padding: 15px;
-                box-sizing: border-box;
-                font-size: 14px;
-            }
-        </style>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Anta&family=Pacifico&display=swap" rel="stylesheet">
-        <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Sofia&effect=neon|outline|emboss|shadow-multiple">
-    </head>
-
-    <body>
-        <div style="margin: 0 auto;text-align:center">
-            <div style="color:#b8e0e8;font-family: 'Sofia', sans-serif;font-size:50px;padding:10px 0">Movie</div>
-{#            <img src="../img/logo.png" style="width:80px;height:auto;">#}
-            <h1 style="padding:10px;font-family: 'Pacifico', cursive; font-weight:100; color:#99ADC3">Nhập mật khẩu mới để
-                đặt lại</h1>
-        </div>
-        <div class="formngoai">
-            <form action="{% url 'reset_password' %}" method="POST" role="form">
-                <div class="form-group">
-                    {% csrf_token %}
-                    <input type="text" name="token" class="form-control" placeholder="Nhập mã xác nhận" required>
-                    <input type="password" name="password" class="form-control" id="" placeholder="Mật khẩu mới" required>
-                </div>
-                <button type="submit" name="submit" class="btn btn-primary">Đặt lại mật khẩu</button>
-            </form>
-            {% if messages %}
-      {% for message in messages %}
-          <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-              {{ message }}
-          </div>
-      {% endfor %}
-  {% endif %}
-        </div>
-
-
-    </body>
-
-    </html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đổi Mật Khẩu</title>
+    <style>
+        body {
+            background: #f4f7fc;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 400px;
+            text-align: center;
+        }
+        .container h1 {
+            font-family: 'Roboto', sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .icon-lock {
+            font-size: 50px;
+            color: #f1c40f;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .form-control {
+            width: 95%;
+            padding: 12px;
+            border: 1px solid #ccd1d9;
+            border-radius: 5px;
+            background: #ecf0f1;
+            font-size: 14px;
+        }
+        button {
+            width: 80%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background: #1a3d7c;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #122b57;
+        }
+        .message {
+            margin-top: 15px;
+            color: #e74c3c;
+            font-size: 14px;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="icon-lock">🔒</div>
+        <h1>Đổi Mật Khẩu</h1>
+        <p>Cập nhật mật khẩu mới để bảo vệ tài khoản của bạn</p>
+        <form action="{% url 'reset_password' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="token">Mã xác nhận</label>
+                <input type="text" name="token" id="token" class="form-control" placeholder="Nhập mã xác nhận" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Mật khẩu mới</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="Nhập mật khẩu mới" required>
+            </div>
+            <button type="submit">Đổi Mật Khẩu</button>
+        </form>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</body>
+</html>

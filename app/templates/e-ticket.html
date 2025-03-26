@@ -10,7 +10,7 @@
             <div class="separator"></div>
             <div class="cinema-info">
                 <div class="cinema-name">{{ room.name }}</div>
-                <div class="showtime">Suất: {{ screening.screening_time }} - {{ screening.screening_date }}</div>
+                <div class="showtime">Suất: {{ screening.screening_time|time:"H:i" }} - {{ screening.screening_date|date:"d/m/Y" }}</div>
             </div>
            <div class="qr-code">
                {% if booking.generate_qr_code %}
@@ -37,10 +37,6 @@
                     <div class="value"> {{ total_price }}0đ</div>
                 </div>
             </div>
-        </div>
-        <div class="button-container">
-            <input type="button" name="previous-step" class="home-page-btn" value="Quay lại"
-            onclick="window.history.back()" />
         </div>
     </div>
     <style>

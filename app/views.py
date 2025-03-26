@@ -33,6 +33,7 @@ from django.conf import settings
 from django.utils import timezone
 import pytz
 import uuid as uuid_lib
+from django.utils.timezone import localtime
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
@@ -181,12 +182,16 @@ def booking(request):
     if not request.session.get('current_user_id'):
         return redirect('login')
     return render(request, 'ticket-booking.html')
+
 def history(request):
     user_id = request.session.get('current_user_id')
     if not user_id:
         return redirect('login')  # Điều hướng nếu chưa đăng nhập
 
-    bookings = Booking.objects.filter(user=user_id)
+    # Sắp xếp theo booking_time giảm dần (từ mới nhất đến cũ nhất)
+    bookings = Booking.objects.filter(user=user_id).order_by('-booking_time')
+    vn_tz = pytz.timezone('Asia/Ho_Chi_Minh')  # Múi giờ Việt Nam
+
     context = {
         'bookings': []
     }
@@ -196,14 +201,19 @@ def history(request):
         movie = get_object_or_404(Movie, id=screening.movie.id)
         genre = get_object_or_404(Genre, id=screening.movie.genre.id)
 
+        # Chuyển đổi thời gian sang múi giờ Việt Nam
+        booking_time_vn = localtime(booking.booking_time, vn_tz).strftime('%d/%m/%Y %H:%M:%S')
+        screening_date_vn = screening.screening_date.strftime('%d/%m/%Y')
+        screening_time_vn = screening.screening_time.strftime('%H:%M:%S')
+
         context['bookings'].append({
             'id': booking.id,
-            'booking_time': booking.booking_time,
+            'booking_time': booking_time_vn,
             'total_price': booking.total_price,
             'screening': {
                 'id': screening.id,
-                'screening_date': screening.screening_date,
-                'screening_time': screening.screening_time,
+                'screening_date': screening_date_vn,
+                'screening_time': screening_time_vn,
             },
             'movie': {
                 'id': movie.id,
@@ -477,39 +487,10 @@ def schedule_view(request):
     })
 
 def details(request):
-    # Lấy ngày hiện tại
-    today = datetime.today().date()
-
-    # Tạo danh sách các ngày trong tuần (5 ngày) từ hôm nay
-    date_list = [today + timedelta(days=i) for i in range(5)]
-
-    # Lấy ngày chiếu được chọn từ URL (nếu có), mặc định là hôm nay
-    selected_date_str = request.GET.get('date', today.strftime('%Y-%m-%d'))
-    try:
-        # Chuyển chuỗi ngày thành đối tượng datetime.date
-        selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
-    except ValueError:
-        # Nếu không thể chuyển đổi, sử dụng ngày hiện tại
-        selected_date = today
-        selected_date_str = today.strftime('%Y-%m-%d')
-
-    # Định dạng danh sách ngày để truyền vào template
-    formatted_date_list = [d.strftime('%Y-%m-%d') for d in date_list]
-    
-    # Thêm log để debug
-    print(f"Details view - Selected date: {selected_date}, formatted as: {selected_date_str}")
-    print(f"Date list: {formatted_date_list}")
-
     # Lấy `movie_id` từ tham số URL
     movie_id = request.GET.get('movie_id')
     # Kiểm tra xem movie có tồn tại không
     movie = get_object_or_404(Movie, id=movie_id)
-
-    # Lọc các screenings theo `movie_id` và ngày được chọn
-    screenings = Screening.objects.filter(movie_id=movie_id, screening_date=selected_date)
-
-    # Danh sách thời gian chiếu
-    screening_times = [screening.screening_time.strftime("%H:%M") for screening in screenings]
 
     # Tạo dữ liệu để gửi vào template
     movie_data = {
@@ -518,16 +499,8 @@ def details(request):
         'genre': movie.genre.genre_name,
         'trailer': movie.trailer,
         'poster': movie.image_ava,
-        'times': screening_times,
     }
-
-    # Render template với dữ liệu
-    return render(request, 'details.html', {
-        'movie': movie_data,
-        'dates': formatted_date_list,
-        'selected_date': selected_date_str
-    })
-
+    return render(request, 'details.html', {'movie': movie_data})  # ✅ Trả về template
 def contact_view(request):
     if request.method == 'POST':
         name = request.POST.get('name')

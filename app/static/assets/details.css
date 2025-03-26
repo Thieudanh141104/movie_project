@@ -32,7 +32,7 @@ body {
      font-family: 'cairo', sans-serif;
      background-color:var(--body-bg2);
      color: var(--text-color);
-     padding-top: 80px;
+     padding-top: 50px;
      min-height: 100vh;
      scroll-behavior: smooth;
 }
@@ -80,7 +80,7 @@ img {
      /* width: 100%; */
      min-width: 1400px;
      margin: 0 auto;
-     min-height: 520px;
+     min-height: 650px;
      position: relative;
 }
 
@@ -305,4 +305,31 @@ img {
      text-align: left;
      padding: 8px;
      width: 100%;
+}
+.btn-container {
+    margin-top: 40px;
+}
+
+.btn-book {
+    display: inline-block;
+    background: linear-gradient(45deg, #ff007f, #ff4db8); /* Hồng neon */
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 12px 25px;
+    border-radius: 30px;
+    box-shadow: 0 4px 10px rgba(255, 0, 127, 0.3);
+    transition: all 0.3s ease-in-out;
+    border: 2px solid white;
+}
+
+.btn-book i {
+    margin-right: 8px;
+}
+
+.btn-book:hover {
+    background: linear-gradient(45deg, #ff4db8, #ff007f);
+    box-shadow: 0 6px 15px rgba(255, 0, 127, 0.5);
+    transform: scale(1.05);
 }
