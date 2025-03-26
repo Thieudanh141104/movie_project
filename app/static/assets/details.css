@@ -3,7 +3,7 @@
      --main-color: #c0392c;
      --second-color: #3a3a3a;
      --clr-white: 0 0% 100%;
-     
+
      --body-bg1: #181616;
      --body-bg2: #000;
      --box-bg:#221f1f;
@@ -54,24 +54,24 @@ img {
 .fullWidth {
      width: 100%;
  }
- 
+
  .fullHeight {
      height: 100vh;
  }
- 
+
  .align-items-center {
      display: flex;
      align-items: center;
      justify-content: center;
      /* text-align: center; */
  }
- 
+
  .bg-img {
     background-position: bottom;
     background-size: cover;
     background-repeat: no-repeat;
  }
- 
+
  .bg-img-fixed {
     background-attachment: fixed;
  }
@@ -246,7 +246,7 @@ img {
 
 .margin {
      margin: 14rem auto 0;
-     
+
 }
 
 
@@ -290,12 +290,12 @@ img {
 .download-src {
      width: 1200px;
      position: relative;
-     
+
 }
 
 .download-src table {
      margin: 20px auto;
-   
+
 }
 
 
@@ -306,6 +306,3 @@ img {
      padding: 8px;
      width: 100%;
 }
-
-
-

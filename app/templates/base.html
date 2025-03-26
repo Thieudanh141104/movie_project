@@ -968,12 +968,6 @@
                     item.querySelector('.movie-poster').insertAdjacentHTML('beforeend', 
                         '<div class="movie-status coming-soon">Sắp chiếu</div>');
                 }
-                
-                // Kiểm tra xem có nút "Mua vé" không và áp dụng class mới
-                const buyButton = item.querySelector('a[href*="booking"], a:contains("Mua vé")');
-                if (buyButton) {
-                    buyButton.className = 'btn-ticket';
-                }
             });
         }
         

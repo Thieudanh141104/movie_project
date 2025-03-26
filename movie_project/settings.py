@@ -121,9 +121,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 cloudinary.config(
-    cloud_name="dpuldllty",
-    api_key="758729176679654",
-    api_secret="3278wH-NSRdIy3MV1c6WyIJiRwo"
+    cloud_name="dkqlaksdo",
+    api_key="893631858931374",
+    api_secret="MPXJZZiRs7TV34Q_KVoFEuYsL7k"
 )
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
@@ -150,8 +150,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'yennhisociuu2004@gmail.com'
-EMAIL_HOST_PASSWORD = 'qniv nutn xkoe mzww'
+EMAIL_HOST_USER = 'kiettran.012647@gmail.com'
+EMAIL_HOST_PASSWORD = 'qqqe wdwx yhpz wnif'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

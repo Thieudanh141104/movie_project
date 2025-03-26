@@ -9,6 +9,34 @@
     body{
         background-color: white;
     }
+  .btn-container {
+    margin-top: 40px;
+}
+
+.btn-book {
+    display: inline-block;
+    background: linear-gradient(45deg, #ff007f, #ff4db8); /* Hồng neon */
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 12px 25px;
+    border-radius: 30px;
+    box-shadow: 0 4px 10px rgba(255, 0, 127, 0.3);
+    transition: all 0.3s ease-in-out;
+    border: 2px solid white;
+}
+
+.btn-book i {
+    margin-right: 8px;
+}
+
+.btn-book:hover {
+    background: linear-gradient(45deg, #ff4db8, #ff007f);
+    box-shadow: 0 6px 15px rgba(255, 0, 127, 0.5);
+    transform: scale(1.05);
+}
+
     </style>
      <section class="movie-banner">
           <div class="hero-wrapper">
@@ -35,6 +63,12 @@
                             </span>
                             Xem Trailer
                         </a>
+                        <div class="btn-container">
+                            <a href="/booking?movie_id={{ movie.id }}" class="btn-book">
+                                <i class="fa fa-ticket"></i> Đặt vé ngay
+                            </a>
+                        </div>
+
                         <div id="small-dialog1" class="zoom-anim-dialog mfp-hide" style="max-width: 80vw">
                             <iframe class="show_trailer" src=""  allow="autoplay; fullscreen" style="width: 80vw; height: 80vh"></iframe>
                         </div>
@@ -43,180 +77,7 @@
 
           </div>
      </section>
-    <style>
-    .date-selector {
-      display: flex;
-      overflow-x: auto;
-      padding: 20px 10px;
-      background: #fff;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      gap: 15px;
-      margin-top:100px;
-      justify-content: center;
-      align-items: center;
-    }
 
-    .date-selector button {
-      flex: 0 0 auto;
-      padding: 15px 20px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      background-color: #f5f5f5;
-      color: #333;
-      transition: all 0.3s;
-    }
-
-    .date-selector button:hover {
-      background-color: #e0e0e0;
-    }
-
-    .date-selector button.active {
-      background-color: #ff3366;
-      color: #fff;
-      box-shadow: 0 4px 10px rgba(255, 51, 102, 0.3);
-    }
-
-    .movie-list {
-      padding: 30px 20px;
-    }
-
-    .movie-item {
-      background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      margin-bottom: 25px;
-      overflow: hidden;
-      display: flex;
-      align-items: flex-start;
-      padding: 20px;
-      gap: 20px;
-    }
-
-    .movie-poster {
-      width: 120px;
-      height: 180px;
-      background-size: cover;
-      background-position: center;
-      border-radius: 10px;
-    }
-
-    .movie-info {
-      flex: 1;
-    }
-
-    .movie-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #333;
-    }
-
-    .movie-genre {
-      font-size: 16px;
-      color: #888;
-      margin-bottom: 15px;
-    }
-
-    .time-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .time-button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      background-color: #f0f8ff;
-      color: #333;
-      transition: all 0.3s;
-    }
-
-    .time-button:hover {
-      background-color: #1890ff;
-      color: white;
-      box-shadow: 0 4px 10px rgba(24, 144, 255, 0.3);
-    }
-  </style>
-
-  <!-- Phần chọn ngày -->
-  <div class="date-selector" id="date-selector">
-    {% for date in dates %}
-      <button
-        data-date="{{ date }}"
-        {% if date == selected_date %}class="active"{% endif %}
-        onclick="loadMovies('{{ date }}')">
-        {% if forloop.first %}
-          Hôm nay
-        {% else %}
-          {{ date|slice:"8:10" }}/{{ date|slice:"5:7" }}/{{ date|slice:"0:4" }}
-        {% endif %}
-      </button>
-    {% endfor %}
-  </div>
-
-  <!-- Danh sách phim -->
-
-  <div class="movie-list" id="movie-list" onclick="window.location.href= '/booking?movie_id={{ movie.id }}'">
-      <div class="movie-item">
-        <div class="movie-poster" style="background-image: url('{{ movie.poster }}')"></div>
-        <div class="movie-info">
-          <div class="movie-title">{{ movie.title }}</div>
-          <div class="movie-genre">{{ movie.genre }}</div>
-          <div class="time-buttons">
-            {% for time in movie.times %}
-              <button class="time-button">{{ time }}</button>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-  </div>
-
-
-  <script>
-   document.addEventListener('DOMContentLoaded', function () {
-    const dateSelector = document.getElementById('date-selector');
-    const buttons = dateSelector.getElementsByTagName('button');
-
-    // Xác định ngày được chọn từ URL và cập nhật trạng thái nút bấm
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedDate = urlParams.get('date') || new Date().toISOString().split('T')[0]; // Ngày mặc định là hôm nay
-    
-    console.log("Ngày được chọn từ URL:", selectedDate);
-
-    for (let button of buttons) {
-        const buttonDate = button.getAttribute('data-date');
-        console.log("Ngày trên nút:", buttonDate);
-        
-        if (buttonDate === selectedDate) {
-            button.classList.add('active');  // Đánh dấu nút bấm được chọn
-        } else {
-            button.classList.remove('active'); // Đảm bảo các nút khác không được chọn
-        }
-    }
-});
-
-// Hàm để tải phim theo ngày được chọn
-function loadMovies(day) {
-    console.log("Ngày đầu vào: ", day);
-    
-    // Sử dụng trực tiếp ngày được chọn (đã được định dạng đúng từ server)
-    const formattedDate = day;
-    console.log("Đã chọn ngày: ", formattedDate);
-    
-    // Chuyển hướng với ngày đã chọn
-    window.location.href = `/details?movie_id=${movieId}&date=${formattedDate}`;
-}
-
-  </script>
-{% endblock %}
-
-{% block extra_js %}
     <script>
   const urlParams = new URLSearchParams(window.location.search);
   const movieId = urlParams.get('movie_id');

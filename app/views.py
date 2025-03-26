@@ -304,17 +304,8 @@ def login_view(request):
 
 
 def logout_view(request):
-    # Lưu URL hiện tại để sau khi đăng xuất có thể quay lại
-    referer = request.META.get('HTTP_REFERER', '/')
-    
-    # Xóa tất cả session data
-    request.session.flush()
-    
-    # Django logout để xóa cookie phiên làm việc
-    logout(request)
-    
-    return redirect(referer)
-
+    logout(request)  # Đăng xuất và xóa session
+    return redirect('login')
 
 def logup_view(request):
     if request.method == 'POST':
@@ -359,9 +350,6 @@ def logup_view(request):
         return redirect('login')  # Chuyển hướng đến trang đăng nhập
 
 def change_password(request):
-    user_id = request.session.get('current_user_id')
-    if not user_id:
-        return redirect('login')  # Điều hướng nếu chưa đăng nhập
     if request.method == 'POST':
         old_password = request.POST.get('old_password')
         new_password = request.POST.get('new_password')
@@ -370,24 +358,21 @@ def change_password(request):
         # Lấy user hiện tại từ session
         user = User.objects.get(id=request.session['current_user_id'])
 
-        # Kiểm tra mật khẩu cũ (so sánh mật khẩu chưa mã hóa)
-        if user.password == old_password:  # Nếu mật khẩu chưa mã hóa
-            pass
-        else:
+        # ✅ Chỉ kiểm tra bằng check_password(), bỏ điều kiện so sánh trực tiếp
+        if not check_password(old_password, user.password):
             messages.error(request, "Mật khẩu cũ không đúng.")
-            return redirect('changepass')  # Đảm bảo đường dẫn đúng
+            return redirect('changepass')
 
         # Kiểm tra mật khẩu mới và xác nhận mật khẩu
         if new_password != confirm_password:
             messages.error(request, "Mật khẩu mới không khớp.")
             return redirect('changepass')
 
-        # Lưu mật khẩu mới (không mã hóa)
-        user.password = new_password
+        # ✅ Mã hóa mật khẩu mới trước khi lưu
+        user.password = make_password(new_password)
         user.save()
 
         messages.success(request, "Mật khẩu đã được thay đổi thành công.")
-        return redirect('login')
 
     return render(request, 'change_pass.html')
 
@@ -404,7 +389,7 @@ def forgot_password(request):
             send_mail(
                 'Quên mật khẩu',
                 f'Xin chào {user.username},\n\nHãy sử dụng mã sau để đặt lại mật khẩu của bạn: {reset_token}',
-                'danhnguyen14112004@gmail.com',
+                'kiettran.012647@gmail.com',
                 [email],
                 fail_silently=False,
             )

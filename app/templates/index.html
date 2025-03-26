@@ -22,16 +22,15 @@
                                     <div class="slider-info mid-view mid-top2 bg bg2" style="background-image:url('${movie.image_cover}'); margin-top: 70px; min-height: 600px">
                                         <div class="container">
                                             <div class="mid-info">
-                                                <span class="sub-text">${movie.genre}</span>
                                                 <h3>${movie.title}</h3>
                                                 <p>${movie.duration}p</p>
-                                                <a href="#small-dialog1" class="popup-with-zoom-anim play-view1">
+                                                <a href="#small-dialog${movie.id}" class="popup-with-zoom-anim play-view1">
                                                     <span class="video-play-icon">
                                                         <span class="fa fa-play" aria-hidden="true"></span>
                                                     </span>
                                                     Xem Trailer
                                                 </a>
-                                                <div id="small-dialog1" class="zoom-anim-dialog mfp-hide" style="max-width: 80vw">
+                                                <div id="small-dialog${movie.id}" class="zoom-anim-dialog mfp-hide" style="max-width: 80vw">
                                                     <iframe src="${movie.trailer}"  allow="autoplay; fullscreen" style="width: 80vw; height: 80vh"></iframe>
                                                 </div>
                                             </div>
@@ -131,12 +130,7 @@
                                         </figure>
                                         <div class="box-content">
                                             <h3 class="title" style="padding: 0">${movie.title}</h3>
-                                            <h4> <span class="post"><span class="fa fa-clock-o"> </span> ${movie.duration}
-
-                                                </span>
-
-                                                <span class="post fa fa-heart text-right"></span>
-                                            </h4>
+                                            <h4> <span class="post"><span class="fa fa-clock-o"> </span> ${movie.duration}</span></h4>
                                         </div>
                                     </a>
                                 </div>
@@ -191,19 +185,13 @@
                                             <img class="img-fluid" src='${movie.image_ava}' alt="">
                                         </figure>
                                         <div class="box-content">
-                                            <h4> <span class="post"><span class="fa fa-clock-o"> </span> ${movie.duration}</span>
-
-                                                <span class="post fa fa-heart text-right"></span>
-                                            </h4>
+                                            <h4> <span class="post"><span class="fa fa-clock-o"> </span> ${movie.duration}</span></h4>
                                         </div>
-                                        <span class="fa fa-play video-icon" aria-hidden="true"></span>
                                     </a>
                                 </div>
                                 <h3> <a class="title-gd" href="/details?movie_id=${movie.id}">${movie.title}</a></h3>
                                 <p>${movie.description}</p>
-                                <div class="button-center text-center mt-4">
-                                    <a style="border: #127681 1px solid;color: #333;" href="/booking?movie_id=${movie.id}" class="btn watch-button">Mua vé</a>
-                                </div>
+
                             </div>`;
                             $('.owl-three').append(movieHTML);
                         });
